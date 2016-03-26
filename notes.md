@@ -71,7 +71,7 @@ minute hour day_of_month month day_of_week tag_rules
 
 ##### Pseudocode
 Excuse the half-python, half-c syntax, just wanted to get my thoughts written down without implementation complexity.
-'''
+```
 struct cron_rule_t {
     bool minutes[60];
     bool hours[24];
@@ -111,5 +111,4 @@ bool rule_match(rule, time) {
             return true;
     return false;
 }
-
-'''
+```
