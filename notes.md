@@ -65,7 +65,6 @@ minute hour day_of_month month day_of_week tag_rules
 
 * lines starting with # are ignored (comments)
 * values are space-separated, only tag_rules can contain whitespace
-* newlines within one rule have to be escaped with a backslash
 * tokens can consist of comma separated sub-tokens
 * sub-token can be *, numeric, a range, divisor, any combination of those, or in the case of day_of_week and month, a three-letter name (e.g. mon, feb)
 
@@ -83,11 +82,8 @@ struct cron_rule_t {
 
 cron_rule_t* parse_config() {
     cron_rule_t* rules[];
-    char* acc;
     for line in file:
         if line.startswith("#"): next;
-        if line.endswith("\\"): acc = line; next;
-        if len(acc) != 0: line = acc + line;
         tokens = line.split(" ");
         # check number of tokens before continuing
         cront_rule_t tmp_rule;
@@ -112,3 +108,9 @@ bool rule_match(rule, time) {
     return false;
 }
 ```
+
+##### Improvement points
+* allow multi-line rules with a backslash escaped newline
+* trim whitespace
+* convert double spaces to single spaces?
+* treat whitespace only lines as empty
