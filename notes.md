@@ -46,3 +46,70 @@ Downside is that I am not fluent in c. This is going to take a lot of research a
 
 #### Useful examples
 * jack-play -> ringbuffer use, file playback
+* dcron -> parsing cron format rules
+
+#### Architecture
+* cli.c - parse command line options and pass them to readtheroom
+* readtheroom.c - determine what file to load next
+* writetheroom.c - consists of 2 threads (by necessity)
+** non-realtime: read file from disk, decode and resample, write to ringbuffer
+** realtime: read from ringbuffer, write to jack port
+
+IPC via local sockets.
+
+#### Config format parsing
+We use the cron format for configuration. Since no parser is available for cpp/c, we create one ourselves using the existing cron libraries.
+
+##### Format
+minute hour day_of_month month day_of_week tag_rules
+
+* lines starting with # are ignored (comments)
+* values are space-separated, only tag_rules can contain whitespace
+* newlines within one rule have to be escaped with a backslash
+* tokens can consist of comma separated sub-tokens
+* sub-token can be *, numeric, a range, divisor, any combination of those, or in the case of day_of_week and month, a three-letter name (e.g. mon, feb)
+
+##### Pseudocode
+Excuse the half-python, half-c syntax, just wanted to get my thoughts written down without implementation complexity.
+'''
+struct cron_rule_t {
+    bool minutes[60];
+    bool hours[24];
+    bool days_of_month[31];
+    bool month[12];
+    bool days_of_week[7];
+    char* rule[];
+}
+
+cron_rule_t* parse_config() {
+    cron_rule_t* rules[];
+    char* acc;
+    for line in file:
+        if line.startswith("#"): next;
+        if line.endswith("\\"): acc = line; next;
+        if len(acc) != 0: line = acc + line;
+        tokens = line.split(" ");
+        # check number of tokens before continuing
+        cront_rule_t tmp_rule;
+        parse_minutes(tokens[0], tmp_rule);
+        parse_hours(tokens[1], tmp_rule);
+        parse_days_of_month(tokens[2], tmp_rule);
+        parse_month(tokens[3], tmp_rule);
+        parse_days_of_week(tokens[4], tmp_rule);
+        tmp_rule.rule = tokens[5:];
+        rules.append(tmp_rule);
+    }
+    return rules;
+}
+
+bool rule_match(rule, time) {
+    if rule.minutes[time.minute] and
+        rule.hours[time.hour] and
+        rule.days_of_month[time.date - 1] and
+        rule.month[time.month - 1] and
+        rule.days_of_week[time.weekday - 1]:
+            return true;
+    return false;
+}
+
+'''
