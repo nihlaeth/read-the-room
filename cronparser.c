@@ -148,5 +148,68 @@ bool* parse_subtoken(char *subtoken) {
         exit(EXIT_FAILURE);
     }
 
+    if (match_regex(&r_subtoken_num, subtoken)) {
+        /* eg 14, or * */
+
+    } else if (match_regex(&r_subtoken_range, subtoken)) {
+        /* eg 1 - 5 */
+
+    } else if (match_regex(&r_subtoken_div, subtoken)) {
+        /* eg 14/2 */
+
+    } else if (match_regex(&r_subtoken_range_div, subtoken)) {
+        /* eg 1-20/3 */
+
+    } else if (match_regex(&r_subtoken_str, subtoken)) {
+        /* eg Mon, Tue, Jan */
+        char *months[12] = {
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Okt",
+            "Nov",
+            "Dec" };
+        char *weekdays[7] = {
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat",
+            "Sun" };
+        int result = -1;
+        int index;
+        // check if subtoken is in months
+        for (index = 0; index < 12; index ++) {
+            if (strcasecmp(months[index], subtoken) == 0) {
+                result = index;
+                break;
+            }
+        }
+        // check if subtoken is in weekdays
+        for (index = 0; index < 7; index ++) {
+            if (strcasecmp(weekdays[index], subtoken) == 0) {
+                result = index;
+                break;
+            }
+        }
+
+        if (result == -1) {
+            syslog(LOG_ERR, "'%s' not in known subtokens", subtoken);
+            exit(EXIT_FAILURE);
+        }
+        values[index] = true;
+    } else {
+        /* unknown subtoken type */
+        syslog(LOG_ERR, "could not parse subtoken '%s'", subtoken);
+        exit(EXIT_FAILURE);
+    }
+
 }
 
