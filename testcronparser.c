@@ -16,6 +16,8 @@ void main() {
     printf("is 10 a numeric subtoken? %d\n", test);
     test = match_regex(&r_subtoken_div, "*/2");
     printf("is */2 a division subtoken? %d\n", test);
+    test = match_regex(&r_subtoken, "Mon");
+    printf("is Mon a subtoken? %d\n", test);
     test = match_regex(&r_subtoken_str, "Mon");
     printf("is Mon a string subtoken? %d\n", test);
     test = match_regex(&r_subtoken, "1-5/3");

@@ -127,7 +127,9 @@ regex_t r_subtoken_range_div;
 regex_t r_subtoken_str;
 
 void regex_init() {
-    compile_regex(&r_subtoken, "^([0-9]+|\\*)(-[0-9]+)?(/[0-9]+)?$");
+    compile_regex(
+        &r_subtoken,
+        "^(([0-9]+|\\*)(-[0-9]+)?(/[0-9]+)?|[a-zA-Z][a-zA-Z][a-zA-Z])$");
     compile_regex(&r_subtoken_num, "^([0-9]+|\\*)$");
     compile_regex(&r_subtoken_range, "^[0-9]+-[0-9]+$");
     compile_regex(&r_subtoken_div, "^(\\*|[0-9]+)/[0-9]+$");
@@ -135,11 +137,16 @@ void regex_init() {
     compile_regex(&r_subtoken_str, "^[a-zA-Z][a-zA-Z][a-zA-Z]$");
 }
 
-int* parse_subtoken(char *subtoken) {
+bool* parse_subtoken(char *subtoken) {
     /* a subtoken should translate to at most 31 distinct values,
      * since none of the tokens have more than 31 distinct values.
      */
-    int values[31];
+    bool values[31] = {false};
+    /* check if subtoken is valid */
+    if (!match_regex(&r_subtoken, subtoken)) {
+        syslog(LOG_ERR, "'%s' is not a valid subtoken", subtoken);
+        exit(EXIT_FAILURE);
+    }
 
 }
 
