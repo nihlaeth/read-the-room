@@ -36,8 +36,6 @@ void parse_config(cron_rule_t **rules, char * filename) {
     }
 
     while ((read = getline(&line, &len, fp)) != -1) {
-        printf("Retrieved line of length %zu :\n", read);
-        printf("%s", line);
         if (line[0] == '#') {
             continue;
         }
@@ -47,7 +45,6 @@ void parse_config(cron_rule_t **rules, char * filename) {
         cron_rule_t * tmp_rule = malloc(sizeof(cron_rule_t)+1);
         init_rule(tmp_rule);
         while(token) {
-            printf("Token %s\n", token);
             switch (index) {
                 case 0:
                     parse_minutes(token, tmp_rule);
@@ -86,14 +83,10 @@ void parse_config(cron_rule_t **rules, char * filename) {
             exit(EXIT_FAILURE);
         }
         if (index > 0) {
-            printf("adding rule to rules\n");
-            printf("index in rules %d\n", rule_index);
-            printf("address of tmp_rule %d\n", tmp_rule);
             rules[rule_index] = tmp_rule;
             rule_index++;
         }
         else {
-            printf("discard rule\n");
             free(tmp_rule);
         }
     }
