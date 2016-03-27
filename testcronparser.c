@@ -5,6 +5,13 @@
 #include <stdbool.h>
 #include "cronparser.h"
 
+void print_bool_array(bool* arr, int len) {
+    int i;
+    for (i = 0; i < len; i++) {
+        printf("%d is %d\n", i, arr[i]);
+    }
+}
+
 void main() {
     regex_init();
     cron_rule_t * rules = parse_config("./testconfig");
@@ -61,5 +68,36 @@ void main() {
     test_result = rule_match(&test_rule, current);
     printf("does current time match? should be false, is %d\n", test_result);
 
+    /* test parse_subtoken */
+    bool result[5];
+
+    printf("parse subtoken *\n");
+    parse_subtoken(result, 5, "*");
+    print_bool_array(result, 5);
+
+    printf("parse subtoken 4\n");
+    parse_subtoken(result, 5, "4");
+    print_bool_array(result, 5);
+    
+    printf("parse-subtoken 1-2\n");
+    parse_subtoken(result, 5, "1-2");
+    print_bool_array(result, 5);
+
+    printf("parse-subtoken Jan\n");
+    parse_subtoken(result, 5, "Jan");
+    print_bool_array(result, 5);
+
+    printf("parse subtoken tue\n");
+    parse_subtoken(result, 5, "tue");
+    print_bool_array(result, 5);
+
+    printf("parse subtoken */2\n");
+    parse_subtoken(result, 5, "*/2");
+    print_bool_array(result, 5);
+
+    printf("parse subtoken 1-3/2\n");
+    parse_subtoken(result, 5, "1-3/2");
+    print_bool_array(result, 5);
+    
     exit(EXIT_SUCCESS);
 }

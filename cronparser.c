@@ -166,11 +166,11 @@ void regex_init() {
     compile_regex(&r_subtoken_str, "^[a-zA-Z][a-zA-Z][a-zA-Z]$");
 }
 
-bool* parse_subtoken(char *subtoken) {
-    /* a subtoken should translate to at most 31 distinct values,
-     * since none of the tokens have more than 31 distinct values.
-     */
-    bool values[31] = {false};
+void parse_subtoken(bool* return_values, int len, char *subtoken) {
+    int i;
+    for (i = 0; i < len; i++) {
+        return_values[i] = false;
+    }
     /* check if subtoken is valid */
     if (!match_regex(&r_subtoken, subtoken)) {
         syslog(LOG_ERR, "'%s' is not a valid subtoken", subtoken);
@@ -179,16 +179,75 @@ bool* parse_subtoken(char *subtoken) {
 
     if (match_regex(&r_subtoken_num, subtoken)) {
         /* eg 14, or * */
+        if (subtoken[0] == '*') {
+            for (i = 0; i < len; i++) {
+                return_values[i] = true;
+            }
+        }
+        else {
+            /* assume subtoken is a number */
+            char *ptr;
+            long int number = strtol(subtoken, &ptr, 10);
+            return_values[number] = true;
+        }
 
     } else if (match_regex(&r_subtoken_range, subtoken)) {
         /* eg 1 - 5 */
-
+        char * ptr_dash;
+        char * ptr_end;
+        long int number_1 = strtol(subtoken, &ptr_dash, 10);
+        long int number_2 = strtol(&ptr_dash[1], &ptr_end, 10);;
+        for (i = 0; i < len; i++) {
+            if ( i >= number_1 && i <= number_2) {
+                return_values[i] = true;
+            }
+        }
     } else if (match_regex(&r_subtoken_div, subtoken)) {
         /* eg 14/2 */
-
+        char * ptr_dash;
+        char * ptr_end;
+        long int divisor;
+        if (subtoken[0] == '*') {
+            divisor = strtol(&subtoken[2], &ptr_end, 10);
+            if (divisor == 0) {
+                syslog(LOG_ERR, "division by zero is not allowed");
+                exit(EXIT_FAILURE);
+            }
+            for (i = 1; i < len; i++) {
+                if (i % divisor == 0) {
+                    return_values[i] = true;
+                }
+            }
+        } else { 
+            long int number_1 = strtol(subtoken, &ptr_dash, 10);
+            divisor = strtol(&ptr_dash[1], &ptr_end, 10);
+            if (divisor == 0) {
+                syslog(LOG_ERR, "division by zero is not allowed");
+                exit(EXIT_FAILURE);
+            }
+            for (i = 1; i < len; i++) {
+                if ( number_1 % divisor == 0 && i == number_1 / divisor) {
+                    return_values[i] = true;
+                }
+            }
+        }
     } else if (match_regex(&r_subtoken_range_div, subtoken)) {
         /* eg 1-20/3 */
-
+        char * ptr_dash;
+        char * ptr_slash;
+        char * ptr_end;
+        long int number_1 = strtol(subtoken, &ptr_dash, 10);
+        long int number_2 = strtol(&ptr_dash[1], &ptr_slash, 10);
+        long int divisor = strtol(&ptr_slash[1], &ptr_end, 10);
+         if (divisor == 0) {
+            syslog(LOG_ERR, "division by zero is not allowed");
+            exit(EXIT_FAILURE);
+        } 
+        for (i = 1; i < len; i++) {
+            if (i >= number_1 && i <= number_2 && i % divisor == 0) {
+                return_values[i] = true;
+            }
+        }
     } else if (match_regex(&r_subtoken_str, subtoken)) {
         /* eg Mon, Tue, Jan */
         char *months[12] = {
@@ -233,12 +292,11 @@ bool* parse_subtoken(char *subtoken) {
             syslog(LOG_ERR, "'%s' not in known subtokens", subtoken);
             exit(EXIT_FAILURE);
         }
-        values[index] = true;
+        return_values[result] = true;
     } else {
         /* unknown subtoken type */
         syslog(LOG_ERR, "could not parse subtoken '%s'", subtoken);
         exit(EXIT_FAILURE);
     }
-
 }
 

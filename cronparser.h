@@ -40,6 +40,6 @@ void parse_hours(char *token, cron_rule_t *rule);
 void parse_days_of_month(char *token, cron_rule_t *rule);
 void parse_months(char *token, cron_rule_t *rule);
 void parse_days_of_week(char *token, cron_rule_t *rule);
-bool* parse_subtoken(char *subtoken);
+void parse_subtoken(bool* return_values, int len, char *subtoken);
 
 #endif // CRONPARSER_H_
