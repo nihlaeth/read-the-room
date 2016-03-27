@@ -110,6 +110,7 @@ void init_rule(cron_rule_t *rule) {
     for (i = 0; i < 7; i++) {
         rule->days_of_week[i] = false;
     }
+    strcpy(rule->rule, "");
 }
 
 bool rule_match(cron_rule_t *rule, time_t time) {
