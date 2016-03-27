@@ -122,7 +122,7 @@ void main() {
     zero_bool_array(hours_array, 24);
     char str[] = "1,3,8-14,16-21/8";
     split_into_subtokens(hours_array, 24, str);
-    printf("split %s into subtokens and parse\n", str);
+    printf("split 1,3,8-14,16-21/8 into subtokens and parse\n");
     print_bool_array(hours_array, 24);
     
     exit(EXIT_SUCCESS);
