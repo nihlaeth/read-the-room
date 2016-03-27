@@ -10,7 +10,7 @@
 #include <string.h>
 #include <regex.h>
 
-#define MAX_RULE_LENGTH
+#define MAX_RULE_LENGTH 200
 
 typedef struct cron_rule_t {
     bool minutes[60];
