@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <syslog.h>
+#include <time.h>
 #include <regex.h>
 #include "cronparser.h"
 #define MAX_ERROR_MSG 0x1000
@@ -85,8 +86,36 @@ cron_rule_t * parse_config(char * filename) {
     return rules;
 }
 
-bool rule_match(cron_rule_t rule, time_t time) {
+void init_rule(cron_rule_t *rule) {
+    int i;
+    for (i = 0; i < 60; i++) {
+        rule->minutes[i] = false;
+    }
+    for (i = 0; i < 24; i++) {
+        rule->hours[i] = false;
+    }
+    for (i = 0; i < 31; i++) {
+        rule->days_of_month[i] = false;
+    }
+    for (i = 0; i < 12; i++) {
+        rule->months[i] = false;
+    }
+    for (i = 0; i < 7; i++) {
+        rule->days_of_week[i] = false;
+    }
+}
 
+bool rule_match(cron_rule_t *rule, time_t time) {
+    struct tm * local_time = localtime(&time);
+    if (
+            rule->minutes[local_time->tm_min] &&
+            rule->hours[local_time->tm_hour] &&
+            rule->days_of_month[local_time->tm_mday - 1] &&
+            rule->months[local_time->tm_mon] &&
+            rule->days_of_week[local_time->tm_wday]) {
+        return true;
+    }
+    return false;
 }
 
 void compile_regex(regex_t *r, const char *regex_text) {
@@ -176,13 +205,13 @@ bool* parse_subtoken(char *subtoken) {
             "Nov",
             "Dec" };
         char *weekdays[7] = {
+            "Sun",
             "Mon",
             "Tue",
             "Wed",
             "Thu",
             "Fri",
-            "Sat",
-            "Sun" };
+            "Sat"};
         int result = -1;
         int index;
         // check if subtoken is in months

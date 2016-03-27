@@ -21,7 +21,9 @@ typedef struct cron_rule_t {
 
 cron_rule_t * parse_config(char *filename);
 
-bool rule_match(cron_rule_t rule, time_t time);
+bool rule_match(cron_rule_t *rule, time_t time);
+
+void init_rule(cron_rule_t *rule);
 
 void compile_regex(regex_t *r, const char *regex_text);
 bool match_regex(regex_t *r, const char *to_match);
