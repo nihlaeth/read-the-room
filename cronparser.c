@@ -73,6 +73,11 @@ void parse_config(cron_rule_t **rules, char * filename) {
                     strncat(tmp_rule->rule, " ", MAX_RULE_LENGTH - 1);
                     // add token
                     strncat(tmp_rule->rule, token, MAX_RULE_LENGTH - 1);
+                    // check if last char is a newline, if so, remove it
+                    size_t len = strlen(tmp_rule->rule);
+                    if (tmp_rule->rule[len -1] == '\n') {
+                        tmp_rule->rule[len - 1] = '\0';
+                    }
                     break;
             }
             token = strtok_r(savePtr, " ", &savePtr);
