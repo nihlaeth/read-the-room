@@ -65,7 +65,17 @@ void parse_config(cron_rule_t **rules, char * filename) {
                     parse_days_of_week(token, tmp_rule);
                     break;
                 default:
-                    // TODO: add token to rule
+                    if (strlen(tmp_rule->rule) + strlen(token) + 2 > MAX_RULE_LENGTH) {
+                        syslog(
+                            LOG_ERR,
+                            "max rule length of %d exceeded",
+                            MAX_RULE_LENGTH);
+                        exit(EXIT_FAILURE);
+                    }
+                    // add a space
+                    strncat(tmp_rule->rule, " ", MAX_RULE_LENGTH - 1);
+                    // add token
+                    strncat(tmp_rule->rule, token, MAX_RULE_LENGTH - 1);
                     break;
             }
             token = strtok_r(savePtr, " ", &savePtr);
