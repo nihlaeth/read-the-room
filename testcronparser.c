@@ -24,6 +24,8 @@ void main() {
     cron_rule_t * rules[20];
     parse_config(rules, "./testconfig");
 
+    printf("text of first rule |%s|\n\n", rules[0]->rule);
+
 
     /* test regex stuff */
     bool test;
