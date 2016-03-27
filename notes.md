@@ -50,12 +50,36 @@ Downside is that I am not fluent in c. This is going to take a lot of research a
 
 #### Architecture
 * cli.c - parse command line options and pass them to readtheroom
-* readtheroom.c - determine what file to load next
+* readtheroom.c - determine what file to load next, pass to writetheroom
 * writetheroom.c - consists of 2 threads (by necessity)
 ** non-realtime: read file from disk, decode and resample, write to ringbuffer
 ** realtime: read from ringbuffer, write to jack port
 
 IPC via local sockets.
+
+#### Command line interface
+##### Functions
+* play/pause
+* skip to next song
+* start and stop daemon(s)
+* display currently playing file (poll daemon status)
+* define alternative config file
+* define jack regex for automatic port connection
+
+##### cli options
+* read-the-room COMMAND(play|pause|next|start|stop|status)
+* play -> resume playback
+* pause -> pause playback
+* start -> start daemons
+** -c FILE -> config file
+** -j REGEX -> autoconnect to jack ports that match regex
+* stop -> stop daemons
+* status -> display server status and what song is currently playing
+
+##### planned features
+* reload config file
+* temporary rule definition
+
 
 #### Config format parsing
 We use the cron format for configuration. Since no parser is available for cpp/c, we create one ourselves using the existing cron libraries.
