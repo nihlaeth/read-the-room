@@ -12,9 +12,17 @@ void print_bool_array(bool* arr, int len) {
     }
 }
 
+void zero_bool_array(bool* arr, int len) {
+    int i;
+    for (i = 0; i < len; i++) {
+        arr[i] = false;
+    }
+}
+
 void main() {
     regex_init();
-    cron_rule_t * rules = parse_config("./testconfig");
+    cron_rule_t * rules[20];
+    parse_config(rules, "./testconfig");
 
 
     /* test regex stuff */
@@ -38,6 +46,7 @@ void main() {
 
 
     /* test rule_match */
+    printf("\n");
     cron_rule_t test_rule;
     init_rule(&test_rule);
     test_rule.minutes[0] = true;
@@ -69,35 +78,52 @@ void main() {
     printf("does current time match? should be false, is %d\n", test_result);
 
     /* test parse_subtoken */
+    printf("\n");
     bool result[5];
 
+    zero_bool_array(result, 5);
     printf("parse subtoken *\n");
     parse_subtoken(result, 5, "*");
     print_bool_array(result, 5);
 
+    zero_bool_array(result, 5);
     printf("parse subtoken 4\n");
     parse_subtoken(result, 5, "4");
     print_bool_array(result, 5);
     
+    zero_bool_array(result, 5);
     printf("parse-subtoken 1-2\n");
     parse_subtoken(result, 5, "1-2");
     print_bool_array(result, 5);
 
+    zero_bool_array(result, 5);
     printf("parse-subtoken Jan\n");
     parse_subtoken(result, 5, "Jan");
     print_bool_array(result, 5);
 
+    zero_bool_array(result, 5);
     printf("parse subtoken tue\n");
     parse_subtoken(result, 5, "tue");
     print_bool_array(result, 5);
 
+    zero_bool_array(result, 5);
     printf("parse subtoken */2\n");
     parse_subtoken(result, 5, "*/2");
     print_bool_array(result, 5);
 
+    zero_bool_array(result, 5);
     printf("parse subtoken 1-3/2\n");
     parse_subtoken(result, 5, "1-3/2");
     print_bool_array(result, 5);
+
+    /* test split_into_subtokens */
+    printf("\n");
+    bool hours_array[24];
+    zero_bool_array(hours_array, 24);
+    char str[] = "1,3,8-14,16-21/8";
+    split_into_subtokens(hours_array, 24, str);
+    printf("split %s into subtokens and parse\n", str);
+    print_bool_array(hours_array, 24);
     
     exit(EXIT_SUCCESS);
 }

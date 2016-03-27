@@ -19,7 +19,7 @@ typedef struct cron_rule_t {
     char *rule;
 } cron_rule_t;
 
-cron_rule_t * parse_config(char *filename);
+void parse_config(cron_rule_t **rules, char *filename);
 
 bool rule_match(cron_rule_t *rule, time_t time);
 
@@ -35,6 +35,7 @@ regex_t r_subtoken_div;
 regex_t r_subtoken_range_div;
 regex_t r_subtoken_str;
 
+void split_into_subtokens(bool* arr, int len, char* token);
 void parse_minutes(char *token, cron_rule_t *rule);
 void parse_hours(char *token, cron_rule_t *rule);
 void parse_days_of_month(char *token, cron_rule_t *rule);

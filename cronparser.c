@@ -22,9 +22,8 @@ typedef struct {
 } cront_rule_t;
 */
 
-cron_rule_t * parse_config(char * filename) {
-    cron_rule_t * rules;
-
+void parse_config(cron_rule_t **rules, char * filename) {
+    int rule_index = 0;
     FILE * fp;
     char * line = NULL;
     size_t len = 0;
@@ -42,11 +41,13 @@ cron_rule_t * parse_config(char * filename) {
         if (line[0] == '#') {
             continue;
         }
-        char *token = strtok(line, " ");
+        char *savePtr = line;
+        char *token = strtok_r(savePtr, " ", &savePtr);
         int index = 0;
+        cron_rule_t * tmp_rule = malloc(sizeof(cron_rule_t)+1);
+        init_rule(tmp_rule);
         while(token) {
             printf("Token %s\n", token);
-            /*
             switch (index) {
                 case 0:
                     parse_minutes(token, tmp_rule);
@@ -67,8 +68,7 @@ cron_rule_t * parse_config(char * filename) {
                     // TODO: add token to rule
                     break;
             }
-            */
-            token = strtok(NULL, " ");
+            token = strtok_r(savePtr, " ", &savePtr);
             index += 1;
         }
         if (index > 0 && index < 5) {
@@ -76,14 +76,21 @@ cron_rule_t * parse_config(char * filename) {
             exit(EXIT_FAILURE);
         }
         if (index > 0) {
-            // TODO: add rule to rules
+            printf("adding rule to rules\n");
+            printf("index in rules %d\n", rule_index);
+            printf("address of tmp_rule %d\n", tmp_rule);
+            rules[rule_index] = tmp_rule;
+            rule_index++;
+        }
+        else {
+            printf("discard rule\n");
+            free(tmp_rule);
         }
     }
 
     fclose(fp);
     if (line)
         free(line);
-    return rules;
 }
 
 void init_rule(cron_rule_t *rule) {
@@ -168,9 +175,13 @@ void regex_init() {
 
 void parse_subtoken(bool* return_values, int len, char *subtoken) {
     int i;
+    /*
+     * arrays are already zero initialized,
+     * don't erase previous subtoken parses!
     for (i = 0; i < len; i++) {
         return_values[i] = false;
     }
+    */
     /* check if subtoken is valid */
     if (!match_regex(&r_subtoken, subtoken)) {
         syslog(LOG_ERR, "'%s' is not a valid subtoken", subtoken);
@@ -298,5 +309,34 @@ void parse_subtoken(bool* return_values, int len, char *subtoken) {
         syslog(LOG_ERR, "could not parse subtoken '%s'", subtoken);
         exit(EXIT_FAILURE);
     }
+}
+
+void split_into_subtokens(bool* arr, int len, char* token) {
+    char *savePtr = token;
+    char *subtoken = strtok_r(savePtr, ",", &savePtr);
+    while (subtoken) {
+        parse_subtoken(arr, len, subtoken);
+        subtoken = strtok_r(savePtr, ",", &savePtr);
+    }
+}
+
+void parse_minutes(char *token, cron_rule_t *rule) {
+    split_into_subtokens(rule->minutes, 60, token);
+}
+
+void parse_hours(char *token, cron_rule_t *rule) {
+    split_into_subtokens(rule->hours, 24, token);
+}
+
+void parse_days_of_month(char *token, cron_rule_t *rule) {
+    split_into_subtokens(rule->days_of_month, 31, token);
+}
+
+void parse_months(char *token, cron_rule_t *rule) {
+    split_into_subtokens(rule->months, 12, token);
+}
+
+void parse_days_of_week(char *token, cron_rule_t *rule) {
+    split_into_subtokens(rule->days_of_week, 7, token);
 }
 
