@@ -268,10 +268,8 @@ char* pick_file(int rulesc, cron_rule_t **rules) {
         free(optional_tags[i]);
     }
     free(mandatory_tags);
-
-    /* FIXME: why can't we free these two below? */
-    //free(optional_tags);
-    //free(exclusion_tags);
+    free(optional_tags);
+    free(exclusion_tags);
 
     return output;
 }
