@@ -1,5 +1,0 @@
-* * * * * testthisconfig
-# comment here!
-30 * * * * another test rule
-* */3 * * * now one
-1,5,34-50 * * * * and another one with some trailing whitespace    
