@@ -23,7 +23,9 @@ char* pick_file(int rulesc, cron_rule_t **rules) {
 
     int i;
     for (i = 0; i < rulesc; i++) {
+        printf("check 0.1\n");
         if (rule_match(rules[i], current)) {
+            printf("check 0.2\n");
             matching_rules[match_index] = rules[i];
             match_index++;
         }

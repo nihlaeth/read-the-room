@@ -21,12 +21,18 @@ void zero_bool_array(bool* arr, int len) {
 
 void main() {
     regex_init();
-    cron_rule_t * rules[20];
-    parse_config(rules, "./testconfig");
+    cron_rule_t **rules = malloc(sizeof(cron_rule_t *));
+    printf("check 0\n");
+    int rulesc = parse_config(rules, "./testconfig");
+    printf("check 1\n");
+    printf("length of rules list is %d\n", rulesc);
 
-    printf("text of first rule |%s|\n\n", rules[0]->rule);
+    if (rulesc > 0) {
+        printf("some minutes bool: %d\n", rules[0]->minutes[0]);
+        printf("text of first rule |%s|\n\n", rules[0]->rule);
+    }
 
-
+    printf("check 2\n");
     /* test regex stuff */
     bool test;
     test = match_regex(&r_subtoken, "10");
@@ -126,6 +132,7 @@ void main() {
     split_into_subtokens(hours_array, 24, str);
     printf("split 1,3,8-14,16-21/8 into subtokens and parse\n");
     print_bool_array(hours_array, 24);
-    
+
+    free(rules);    
     exit(EXIT_SUCCESS);
 }

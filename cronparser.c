@@ -88,6 +88,8 @@ int parse_config(cron_rule_t **rules, char * filename) {
             exit(EXIT_FAILURE);
         }
         if (index > 0) {
+            /* make space for another pointer in rules */
+            rules = realloc(rules, sizeof(cron_rule_t *) * (rule_index + 1));
             rules[rule_index] = tmp_rule;
             rule_index++;
         }
