@@ -22,7 +22,7 @@ typedef struct {
 } cront_rule_t;
 */
 
-void parse_config(cron_rule_t **rules, char * filename) {
+int parse_config(cron_rule_t **rules, char * filename) {
     int rule_index = 0;
     FILE * fp;
     char * line = NULL;
@@ -99,6 +99,7 @@ void parse_config(cron_rule_t **rules, char * filename) {
     fclose(fp);
     if (line)
         free(line);
+    return rule_index;
 }
 
 void init_rule(cron_rule_t *rule) {

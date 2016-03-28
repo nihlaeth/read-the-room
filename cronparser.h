@@ -21,7 +21,7 @@ typedef struct cron_rule_t {
     char rule[MAX_RULE_LENGTH];
 } cron_rule_t;
 
-void parse_config(cron_rule_t **rules, char *filename);
+int parse_config(cron_rule_t **rules, char *filename);
 
 bool rule_match(cron_rule_t *rule, time_t time);
 
