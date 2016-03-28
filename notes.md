@@ -52,9 +52,9 @@ Downside is that I am not fluent in c. This is going to take a lot of research a
 * cli.c - parse command line options and pass them to readtheroom
 * readtheroom.c - determine what file to load next, pass to writetheroom
 * writetheroom.c - consists of 3 threads
-** non-realtime: socket read thread
-** non-realtime: read file from disk, decode and resample, write to ringbuffer
-** realtime: read from ringbuffer, write to jack port
+* * non-realtime: socket read thread
+* * non-realtime: read file from disk, decode and resample, write to ringbuffer
+* * realtime: read from ringbuffer, write to jack port
 
 IPC via local sockets.
 
@@ -72,8 +72,8 @@ IPC via local sockets.
 * play -> resume playback
 * pause -> pause playback
 * start -> start daemons
-** -c FILE -> config file
-** -j REGEX -> autoconnect to jack ports that match regex
+* * -c FILE -> config file
+* * -j REGEX -> autoconnect to jack ports that match regex
 * stop -> stop daemons
 * status -> display server status and what song is currently playing
 
@@ -82,20 +82,38 @@ IPC via local sockets.
 * reload config file
 * temporary rule definition
 
-#### Communication between rtrd & jack client
+#### Communication between daemons
 commands separated by newlines
-##### rtrd -> jack_client
-* LOGIN
+
+##### rtr can receive:
+###### read-the-room(client) to rtrd(server)
+* IDENT read-the-room
 * PAUSE
 * PLAY
-* NEXT filename
-* FILE filename
+* NEXT
 * CURRENT
 * STOP
 
-##### jack_client -> rtrd
+###### rtr-jack(client) to rtrd(server)
+* IDENT rtr-jack
 * REQFILE
 * ACK
+
+##### rtrd can send:
+###### rtrd(server) to read-the-room(client)
+* CURRENT filename
+* ACK
+
+###### rtrd(server) to rtr-jack(client)
+* FILE filename
+
+Then there are a couple of messages that need to be initiated by rtrd.
+Either we add a socket (complicated, threads or forks required), or we
+use a signal to have rtr-jack connect.
+* NEXT filename
+* PAUSE
+* PLAY
+* STOP
 
 #### Config format parsing
 We use the cron format for configuration. Since no parser is available for cpp/c, we create one ourselves using the existing cron libraries.
