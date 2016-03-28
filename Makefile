@@ -1,3 +1,6 @@
+rtrd: rtrd.c cronparser.c sockets.c daemonize.c pickfile.c
+	gcc -o bin/rtrd rtrd.c cronparser.c sockets.c daemonize.c pickfile.c
+
 test: testdaemon.c testpickfile.c testcronparser.c daemonize.c cronparser.c pickfile.c testclient.c testserver.c sockets.c
 	gcc -o bin/testpickfile testpickfile.c cronparser.c pickfile.c 
 	gcc -o bin/testcronparser testcronparser.c cronparser.c
