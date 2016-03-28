@@ -17,7 +17,7 @@
 #endif
 
 void signal_handler(int sig);
-void daemonize();
+void daemonize(char* name);
 
 
 #endif // DAEMONIZE_H_

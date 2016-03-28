@@ -2,7 +2,7 @@
 #include "daemonize.h"
 
 void main() {
-    daemonize();
+    daemonize("testdaemon");
     while (1) {
         sleep(2);
         syslog(LOG_INFO, "Daemon alive");

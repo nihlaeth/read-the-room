@@ -21,7 +21,7 @@ void signal_handler(int sig)
     }
 }
 
-void daemonize() {
+void daemonize(char* name) {
     /* first fork */
     printf("first fork\n");
     pid_t pid = fork();
@@ -86,6 +86,6 @@ void daemonize() {
     write(lfp, str, 10);
 
     /* Open the log file */
-    openlog(DAEMON_NAME, LOG_PID, LOG_DAEMON);
+    openlog(name, LOG_PID, LOG_DAEMON);
     syslog(LOG_INFO, "Daemon started");
 }
