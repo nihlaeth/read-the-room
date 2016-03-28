@@ -133,6 +133,10 @@ void main() {
     printf("split 1,3,8-14,16-21/8 into subtokens and parse\n");
     print_bool_array(hours_array, 24);
 
+    int i;
+    for (i = 0; i < rulesc; i++) {
+        free(rules[i]);
+    }
     free(rules);    
     exit(EXIT_SUCCESS);
 }
