@@ -97,7 +97,7 @@ commands separated by newlines
 ###### rtr-jack(client) to rtrd(server)
 * IDENT rtr-jack
 * REQFILE
-* ACK
+* YES?
 
 ##### rtrd can send:
 ###### rtrd(server) to read-the-room(client)
@@ -108,8 +108,8 @@ commands separated by newlines
 * FILE filename
 
 Then there are a couple of messages that need to be initiated by rtrd.
-Either we add a socket (complicated, threads or forks required), or we
-use a signal to have rtr-jack connect.
+At such a time, we send SIGUSR1 to rtr-jack, at which it will sign on
+and send us a YES? - we will respond with the following:
 * NEXT filename
 * PAUSE
 * PLAY
