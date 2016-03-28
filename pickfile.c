@@ -14,7 +14,6 @@ char* pick_file(int rulesc, cron_rule_t **rules) {
     /*
      * read rules, select file, store file name in filename
      */
-    printf("check 0\n");
     time_t current;
     time(&current);
     /* we will have at most rulesc matches */
@@ -23,22 +22,18 @@ char* pick_file(int rulesc, cron_rule_t **rules) {
 
     int i;
     for (i = 0; i < rulesc; i++) {
-        printf("check 0.1\n");
         if (rule_match(rules[i], current)) {
-            printf("check 0.2\n");
             matching_rules[match_index] = rules[i];
             match_index++;
         }
     }
 
-    printf("check 1\n");
     /* get total length of rules */
     size_t len = 0;
     for (i = 0; i < match_index; i++) {
         len += strlen(matching_rules[i]->rule);
     }
 
-    printf("check 2\n");
     /* concat all matching rules */
     char *all_rules = malloc(len + 1);
     strcpy(all_rules, "");
@@ -47,7 +42,6 @@ char* pick_file(int rulesc, cron_rule_t **rules) {
         strncat(all_rules, matching_rules[i]->rule, len);
     }
 
-    printf("check 3\n");
     /* 
      * arrays for tags -> we use them to construct the tmsu command
      * 
@@ -64,7 +58,6 @@ char* pick_file(int rulesc, cron_rule_t **rules) {
     char **exclusion_tags = malloc(size_of_pointers);
     int exclusionc = 0;
 
-    printf("check 4\n");
     /* loop through tags */
     char *savePtr = all_rules;
     char *tag = strtok_r(savePtr, " ", &savePtr);
@@ -104,7 +97,6 @@ char* pick_file(int rulesc, cron_rule_t **rules) {
         tag = strtok_r(savePtr, " ", &savePtr);
     }
 
-    printf("check 5\n");
     /* construct command */
     char *cmd = malloc(strlen("tmsu files ") + 1);
     strcpy(cmd, "tmsu files ");
@@ -112,18 +104,13 @@ char* pick_file(int rulesc, cron_rule_t **rules) {
     int last_tag = 0;
     size_t new_cmd_len;
 
-    printf("check 6\n");
     /* handle all optional tags */
     for (i = 0; i < optionalc; i++) {
         switch (last_tag) {
             case 0:
                 /* first tag of this command, no prefix necessary */
-                printf("check 6.1\n");
-                printf("|%s|\n", optional_tags[i]);
                 new_cmd_len = strlen(cmd) + strlen(optional_tags[i]);
-                printf("check 6.2\n");
                 cmd = realloc(cmd, new_cmd_len + 1);
-                printf("check 6.3\n");
                 strncat(cmd, optional_tags[i], new_cmd_len);
                 break;
             case 1:
@@ -159,7 +146,6 @@ char* pick_file(int rulesc, cron_rule_t **rules) {
         last_tag = 2;
     }
 
-    printf("check 7\n");
     /* handle all mandatory tags */
     for (i = 0; i < mandatoryc; i++) {
         switch (last_tag) {
@@ -193,7 +179,6 @@ char* pick_file(int rulesc, cron_rule_t **rules) {
         last_tag = 1;
     }
 
-    printf("check 8\n");
     /* handle exclusion tags */
     for (i = 0; i < exclusionc; i++) {
         switch (last_tag) {
@@ -228,8 +213,6 @@ char* pick_file(int rulesc, cron_rule_t **rules) {
         last_tag = 3;
     }
     
-    /* we now have a complete argument! print it out */
-    printf("command = |%s|\n", cmd);
     /* add the shuf command */
     char *shuf = " 2>&1 | shuf -n 1 2>&1";
     cmd = realloc(cmd, strlen(cmd) + strlen(shuf) + 1);
@@ -256,7 +239,6 @@ char* pick_file(int rulesc, cron_rule_t **rules) {
         exit(EXIT_FAILURE);
     } else {
         /* we got a file name! or a tmsu error... */
-        printf("output |%s|\n", output);
         if (output[0] != '.' && output[0] != '/') {
             syslog(LOG_ERR, "Looks like |%s| failed to execute: |%s|", cmd, output);
             exit(EXIT_FAILURE);
@@ -272,32 +254,23 @@ char* pick_file(int rulesc, cron_rule_t **rules) {
     }
 
 
-    printf("check 9\n");
     /* free up all the dynamically allocated memory */
     free(cmd);
-    printf("check 9.1\n");
     free(matching_rules);
-    printf("check 9.2\n");
     free(all_rules);
-    printf("check 9.3\n");
     for (i = 0; i < mandatoryc; i++) {
         free(mandatory_tags[i]);
     }
-    printf("check 9.4\n");
     for (i = 0; i < exclusionc; i++) {
         free(exclusion_tags[i]);
     }
-    printf("check 9.5\n");
     for (i = 0; i < optionalc; i++) {
         free(optional_tags[i]);
     }
-    printf("check 9.6\n");
     free(mandatory_tags);
 
     /* FIXME: why can't we free these two below? */
-    printf("check 9.7\n");
     //free(optional_tags);
-    printf("check 9.8\n");
     //free(exclusion_tags);
 
     return output;
