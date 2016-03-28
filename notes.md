@@ -51,7 +51,8 @@ Downside is that I am not fluent in c. This is going to take a lot of research a
 #### Architecture
 * cli.c - parse command line options and pass them to readtheroom
 * readtheroom.c - determine what file to load next, pass to writetheroom
-* writetheroom.c - consists of 2 threads (by necessity)
+* writetheroom.c - consists of 3 threads
+** non-realtime: socket read thread
 ** non-realtime: read file from disk, decode and resample, write to ringbuffer
 ** realtime: read from ringbuffer, write to jack port
 
@@ -77,9 +78,24 @@ IPC via local sockets.
 * status -> display server status and what song is currently playing
 
 ##### planned features
+* volume control
 * reload config file
 * temporary rule definition
 
+#### Communication between rtrd & jack client
+commands separated by newlines
+##### rtrd -> jack_client
+* LOGIN
+* PAUSE
+* PLAY
+* NEXT filename
+* FILE filename
+* CURRENT
+* STOP
+
+##### jack_client -> rtrd
+* REQFILE
+* ACK
 
 #### Config format parsing
 We use the cron format for configuration. Since no parser is available for cpp/c, we create one ourselves using the existing cron libraries.
@@ -138,3 +154,14 @@ bool rule_match(rule, time) {
 * trim whitespace
 * convert double spaces to single spaces?
 * treat whitespace only lines as empty
+
+#### rtrd
+
+##### rules
+Rules are space separated lists of tmsu tags, prefixed with -|+|? to indicate their optionality and/or exclusion.
+
+* + -> mandatory: means this tag has to be present
+* ? -> optional: means a file will be chose with at least one of the optional tags
+* - -> exclusion: files with this tag will be excluded
+
+
