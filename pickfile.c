@@ -98,8 +98,9 @@ void pick_file(int rulesc, cron_rule_t **rules, char* file_name) {
     }
 
     /* construct command */
-    char *cmd = malloc(strlen("tmsu files ") + 1);
-    strcpy(cmd, "tmsu files ");
+    char *tmsu = "/usr/bin/tmsu files ";
+    char *cmd = malloc(strlen(tmsu) + 1);
+    strcpy(cmd, tmsu);
     /* 0 == none, 1 == mandatory, 2 == optional, 3 == exclusion */
     int last_tag = 0;
     size_t new_cmd_len;
@@ -214,7 +215,7 @@ void pick_file(int rulesc, cron_rule_t **rules, char* file_name) {
     }
     
     /* add the shuf command */
-    char *shuf = " 2>&1 | shuf -n 1 2>&1";
+    char *shuf = " 2>&1 | /usr/bin/shuf -n 1 2>&1";
     cmd = realloc(cmd, strlen(cmd) + strlen(shuf) + 1);
     strncat(cmd, shuf, strlen(cmd) + strlen(shuf));
 
@@ -232,25 +233,28 @@ void pick_file(int rulesc, cron_rule_t **rules, char* file_name) {
         output = realloc(output, strlen(output) + strlen(buff) + 1);
         strncat(output, buff, strlen(output) + strlen(buff));
     }
-    if (ferror(in) != 0 || pclose(in) != 0) {
-        /* only the exit code of the last command is shown,
-         * so tmsu errors are ignored */
-        syslog(LOG_ERR, "Command execution failed |%s|", cmd);
+    /*
+     * for some reason, the exit code is nonzero when run from
+     * a daemon, even though the command execution was successful
+     if (ferror(in) != 0 || pclose(in) != 0) {
+        // only the exit code of the last command is shown,
+         // so tmsu errors are ignored
+        syslog(LOG_ERR, "Command execution failed |%s|, output: |%s|", cmd, output);
         exit(EXIT_FAILURE);
     } else {
-        /* we got a file name! or a tmsu error... */
-        if (output[0] != '.' && output[0] != '/') {
-            syslog(LOG_ERR, "Looks like |%s| failed to execute: |%s|", cmd, output);
-            exit(EXIT_FAILURE);
-        }
-        /* remove trailing newline */
-        int index = strlen(output) - 1;
-        if (output[index] == '\n') {
-            output[index] = '\0';
-        }
-        if (output[index - 1] == '\r') {
-            output[index - 1] = '\0';
-        }
+     */
+    /* we got a file name! or a tmsu error... */
+    if (output[0] != '.' && output[0] != '/') {
+        syslog(LOG_ERR, "Looks like |%s| failed to execute: |%s|", cmd, output);
+        exit(EXIT_FAILURE);
+    }
+    /* remove trailing newline */
+    int index = strlen(output) - 1;
+    if (output[index] == '\n') {
+        output[index] = '\0';
+    }
+    if (output[index - 1] == '\r') {
+        output[index - 1] = '\0';
     }
 
 
