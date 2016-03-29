@@ -26,7 +26,7 @@ void send_ack(int socketfd) {
     }
 }
 
-int handle_message(int socketfd, char *msg) {
+void handle_message(int socketfd, char *msg) {
     /* identify message and formulate a response */
 
     /* 
@@ -88,7 +88,7 @@ int handle_message(int socketfd, char *msg) {
         if (strcasecmp(queued_message, "STOP\n") == 0) {
             // shut down this daemon too!
             syslog(LOG_INFO, "Shutting down rtrd");
-            return true;
+            exit(EXIT_SUCCESS);
         }
         else {
             strcpy(queued_message, "");
@@ -98,7 +98,6 @@ int handle_message(int socketfd, char *msg) {
         /* unknown message */
         syslog(LOG_WARNING, "Unknown message |%s|", msg);
     }
-    return false;
 }
 
 void server_connection(int socketfd) {
@@ -131,10 +130,7 @@ void server_connection(int socketfd) {
             newline[0] = '\0';
             msg = realloc(msg, strlen(msg) + strlen(buf) + 1);
             strncat(msg, buf, strlen(msg) + strlen(buf));
-            if (handle_message(socketfd, msg)) {
-                /* return value of true means we shut down */
-                break;
-            }
+            handle_message(socketfd, msg);
             
             /* figure out if the remaining message is worth the trouble */
             if (strlen(rest) > 1) {
