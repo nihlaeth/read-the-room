@@ -70,19 +70,13 @@ int handle_message(int socketfd, char *msg) {
         // at ack, also shut down this daemon!
         send_ack(socketfd);
     } else if (strcasecmp(msg, "REQFILE") == 0) {
-        syslog(LOG_INFO, "check 2");
         pick_file(rulesc, rules, current_song);
-        syslog(LOG_INFO, "check 3");
         size_t len = strlen(current_song) + strlen("FILE \n");
-        syslog(LOG_INFO, "check 4");
         char* tmp_msg = malloc(len + 1);
-        syslog(LOG_INFO, "check 5");
         snprintf(tmp_msg, len, "FILE %s\n", current_song);
-        syslog(LOG_INFO, "check 6");
         if (send(socketfd, tmp_msg, len + 1, 0) == -1) {
             syslog(LOG_WARNING, "Failed to send new song.");
         }
-        syslog(LOG_INFO, "check 1");
         free(tmp_msg);
     } else if (strcasecmp(msg, "YES?") == 0) {
         /* send message from queue */
@@ -166,7 +160,6 @@ void main() {
     regex_init();
     rules = malloc(sizeof(cron_rule_t *));
     rulesc = parse_config(rules, "/git/read-the-room/testconfig");
-    syslog(LOG_INFO, "rulesc=%d, pointers: rules=%d, rules[0]=%d", rulesc, &rules, &rules[0]);
 
     /* listen to socket */
     server_socket("/tmp/rtrd", *server_connection);

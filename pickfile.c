@@ -16,44 +16,32 @@ void pick_file(int rulesc, cron_rule_t **rules, char* file_name) {
      */
     time_t current;
     time(&current);
-    syslog(LOG_INFO, "check 5");
     /* we will have at most rulesc matches */
     cron_rule_t **matching_rules = malloc(sizeof(cron_rule_t *) * rulesc);
     int match_index = 0;
 
-    syslog(LOG_INFO, "check 5.0");
     int i;
     for (i = 0; i < rulesc; i++) {
-        syslog(LOG_INFO, "see if rule matches, i=%d", i);
-        syslog(LOG_INFO, "pointers: rules[i]=%d, current=%d", &rules[i], &current);
         if (rule_match(rules[i], current)) {
-            syslog(LOG_INFO, "rule matches");
             matching_rules[match_index] = rules[i];
             match_index++;
         }
-        else {
-            syslog(LOG_INFO, "no match");
-        }
     }
 
-    syslog(LOG_INFO, "check 5.1");
     /* get total length of rules */
     size_t len = 0;
     for (i = 0; i < match_index; i++) {
         len += strlen(matching_rules[i]->rule);
     }
 
-    syslog(LOG_INFO, "check 5.2");
     /* concat all matching rules */
     char *all_rules = malloc(len + 1);
     strcpy(all_rules, "");
 
-    syslog(LOG_INFO, "check 5.3");
     for (i = 0; i < match_index; i++) {
         strncat(all_rules, matching_rules[i]->rule, len);
     }
 
-    syslog(LOG_INFO, "check 6");
     /* 
      * arrays for tags -> we use them to construct the tmsu command
      * 
@@ -116,7 +104,6 @@ void pick_file(int rulesc, cron_rule_t **rules, char* file_name) {
     int last_tag = 0;
     size_t new_cmd_len;
 
-    syslog(LOG_INFO, "check 7");
     /* handle all optional tags */
     for (i = 0; i < optionalc; i++) {
         switch (last_tag) {
@@ -267,7 +254,6 @@ void pick_file(int rulesc, cron_rule_t **rules, char* file_name) {
     }
 
 
-    syslog(LOG_INFO, "check 8");
     /* free up all the dynamically allocated memory */
     free(cmd);
     free(matching_rules);
@@ -285,7 +271,6 @@ void pick_file(int rulesc, cron_rule_t **rules, char* file_name) {
     free(optional_tags);
     free(exclusion_tags);
 
-    syslog(LOG_INFO, "check 9");
     file_name = realloc(file_name, strlen(output) + 1);
     strcpy(file_name, output);
     free(output);

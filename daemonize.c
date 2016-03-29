@@ -23,19 +23,16 @@ void signal_handler(int sig)
 
 void daemonize(char* name) {
     /* first fork */
-    printf("first fork\n");
     pid_t pid = fork();
     if (pid < 0) { exit(EXIT_FAILURE); }
     if (pid > 0) { exit(EXIT_SUCCESS); }
 
     /* set sid */
-    printf("set sid\n");
     if (setsid() < 0) {
         exit(EXIT_FAILURE);
     }
 
     /* Catch, ignore and handle signals */
-    printf("register signal handlers\n");
     //TODO: Implement a working signal handler */
     signal(SIGHUP, signal_handler); /* hangup signal */
     signal(SIGTERM, signal_handler); /* software termination signal from kill */
@@ -43,21 +40,17 @@ void daemonize(char* name) {
     //signal(SIGHUP, SIG_IGN);    
     
     /* second fork */
-    printf("second fork\n");
     pid = fork();
     if (pid < 0) { exit(EXIT_FAILURE); }
     if (pid > 0) { exit(EXIT_SUCCESS); }
 
     /* set file permissions */
-    printf("set file permission mask\n");
     umask(0);
 
     /* chdir to safe directory */
-    printf("chdir to root\n");
     chdir("/");
 
     /* close all open file descriptors */
-    printf("closing all open file descriptors - bye!\n");
     int fd;
     for (fd = sysconf(_SC_OPEN_MAX); fd > 0; fd--)
     {
