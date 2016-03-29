@@ -12,7 +12,7 @@
 
 cron_rule_t **rules;
 int rulesc;
-char *current_song;
+char **current_song;
 /* we could use a queue here, but that's a lot of hasle
  * for something we will probably never actually use
  * for now, if a new message needs to be queued before
@@ -57,9 +57,9 @@ void handle_message(int socketfd, char *msg) {
         // send SIGUSR1
         send_ack(socketfd);
     } else if (strcasecmp(msg, "CURRENT") == 0) {
-        size_t len = strlen(current_song) + strlen("CURRENT \n");
+        size_t len = strlen(*current_song) + strlen("CURRENT \n");
         char* tmp_msg = malloc(len + 1);
-        snprintf(tmp_msg, len, "CURRENT %s\n", current_song);
+        snprintf(tmp_msg, len, "CURRENT %s\n", *current_song);
         if (send(socketfd, tmp_msg, len + 1, 0) == -1) {
             syslog(LOG_WARNING, "Failed to send current playing song.");
         }
@@ -71,11 +71,11 @@ void handle_message(int socketfd, char *msg) {
         // at ack, also shut down this daemon!
         send_ack(socketfd);
     } else if (strcasecmp(msg, "REQFILE") == 0) {
+        free(*current_song);
         pick_file(rulesc, rules, current_song);
-        syslog(LOG_INFO, "Current song: |%s|", current_song);
-        size_t len = strlen(current_song) + strlen("FILE \n");
+        size_t len = strlen(*current_song) + strlen("FILE \n");
         char* tmp_msg = malloc(len + 1);
-        snprintf(tmp_msg, len, "FILE %s\n", current_song);
+        snprintf(tmp_msg, len, "FILE %s\n", *current_song);
         if (send(socketfd, tmp_msg, len + 1, 0) == -1) {
             syslog(LOG_WARNING, "Failed to send new song.");
         }
@@ -151,8 +151,9 @@ void main() {
     /* init some data */
     queued_message = malloc(sizeof(char *));
     strcpy(queued_message, "");
-    current_song = malloc(sizeof(char));
-    strcpy(current_song, "");
+    char* tmp = malloc(sizeof(char));
+    strcpy(tmp, "");
+    current_song = &tmp;
 
     /* load rules from config */
     regex_init();
@@ -164,7 +165,7 @@ void main() {
     
     /* free memory */
     free(queued_message);
-    free(current_song);
+    free(*current_song);
     int i;
     for (i = 0; i < rulesc; i++) {
         free(rules[i]);

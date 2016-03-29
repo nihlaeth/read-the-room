@@ -10,7 +10,7 @@
 #include "./cronparser.h"
 
 
-void pick_file(int rulesc, cron_rule_t **rules, char* file_name) {
+void pick_file(int rulesc, cron_rule_t **rules, char **file_name) {
     /*
      * read rules, select file, store file name in filename
      */
@@ -257,7 +257,6 @@ void pick_file(int rulesc, cron_rule_t **rules, char* file_name) {
         output[index - 1] = '\0';
     }
 
-
     /* free up all the dynamically allocated memory */
     free(cmd);
     free(matching_rules);
@@ -275,7 +274,5 @@ void pick_file(int rulesc, cron_rule_t **rules, char* file_name) {
     free(optional_tags);
     free(exclusion_tags);
 
-    file_name = realloc(file_name, strlen(output) + 1);
-    strcpy(file_name, output);
-    free(output);
+    *file_name = output;
 }
