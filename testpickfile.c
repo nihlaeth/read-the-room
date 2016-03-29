@@ -9,7 +9,9 @@ void main() {
     regex_init();
     cron_rule_t ** rules = malloc(sizeof(cron_rule_t *));
     int rulesc = parse_config(rules, "./testconfig");
-    char * filename = pick_file(rulesc, rules);
+    char * filename = malloc(sizeof(char));
+    strcpy(filename, "");
+    pick_file(rulesc, rules, filename);
     printf("my filename = |%s|\n", filename);
     int i;
     for (i = 0; i < rulesc; i++) {
@@ -17,4 +19,5 @@ void main() {
     }
     free(rules);
     free(filename);
+    exit(EXIT_SUCCESS);
 }

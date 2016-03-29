@@ -36,13 +36,14 @@ int parse_config(cron_rule_t **rules, char * filename) {
     }
 
     while ((read = getline(&line, &len, fp)) != -1) {
+        syslog(LOG_INFO, "config line |%s|", line);
+        int index = 0;
         if (line[0] == '#') {
             continue;
         }
         char *savePtr = line;
         char *token = strtok_r(savePtr, " ", &savePtr);
-        int index = 0;
-        cron_rule_t * tmp_rule = malloc(sizeof(cron_rule_t)+1);
+        cron_rule_t * tmp_rule = malloc(sizeof(cron_rule_t));
         init_rule(tmp_rule);
         while(token) {
             switch (index) {
@@ -83,17 +84,21 @@ int parse_config(cron_rule_t **rules, char * filename) {
             token = strtok_r(savePtr, " ", &savePtr);
             index += 1;
         }
+        syslog(LOG_INFO, "index = %d", index);
         if (index > 0 && index < 5) {
             syslog(LOG_ERR, "Not enough tokens in rule '%s'.", line);
             exit(EXIT_FAILURE);
         }
         if (index > 0) {
             /* make space for another pointer in rules */
+            syslog(LOG_INFO, "Adding rule, tmp_rule=%d", &tmp_rule);
             rules = realloc(rules, sizeof(cron_rule_t *) * (rule_index + 1));
             rules[rule_index] = tmp_rule;
+            syslog(LOG_INFO, "rules[0]=%d", &rules[0]);
             rule_index++;
         }
         else {
+            syslog(LOG_INFO, "freeing tmp_rule");
             free(tmp_rule);
         }
     }
@@ -101,6 +106,7 @@ int parse_config(cron_rule_t **rules, char * filename) {
     fclose(fp);
     if (line)
         free(line);
+    syslog(LOG_INFO, "here, rules[0]=%d", &rules[0]);
     return rule_index;
 }
 
@@ -125,13 +131,16 @@ void init_rule(cron_rule_t *rule) {
 }
 
 bool rule_match(cron_rule_t *rule, time_t time) {
+    syslog(LOG_INFO, "matching check 0");
     struct tm * local_time = localtime(&time);
+    syslog(LOG_INFO, "matching check 1");
     if (
             rule->minutes[local_time->tm_min] &&
             rule->hours[local_time->tm_hour] &&
             rule->days_of_month[local_time->tm_mday - 1] &&
             rule->months[local_time->tm_mon] &&
             rule->days_of_week[local_time->tm_wday]) {
+        syslog(LOG_INFO, "matching check 2");
         return true;
     }
     return false;

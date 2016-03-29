@@ -70,14 +70,19 @@ int handle_message(int socketfd, char *msg) {
         // at ack, also shut down this daemon!
         send_ack(socketfd);
     } else if (strcasecmp(msg, "REQFILE") == 0) {
-        free(current_song);
-        current_song = pick_file(rulesc, rules);
+        syslog(LOG_INFO, "check 2");
+        pick_file(rulesc, rules, current_song);
+        syslog(LOG_INFO, "check 3");
         size_t len = strlen(current_song) + strlen("FILE \n");
+        syslog(LOG_INFO, "check 4");
         char* tmp_msg = malloc(len + 1);
+        syslog(LOG_INFO, "check 5");
         snprintf(tmp_msg, len, "FILE %s\n", current_song);
+        syslog(LOG_INFO, "check 6");
         if (send(socketfd, tmp_msg, len + 1, 0) == -1) {
             syslog(LOG_WARNING, "Failed to send new song.");
         }
+        syslog(LOG_INFO, "check 1");
         free(tmp_msg);
     } else if (strcasecmp(msg, "YES?") == 0) {
         /* send message from queue */
@@ -86,6 +91,7 @@ int handle_message(int socketfd, char *msg) {
         }
         if (strcasecmp(queued_message, "STOP\n") == 0) {
             // shut down this daemon too!
+            syslog(LOG_INFO, "Shutting down rtrd");
             return true;
         }
         else {
@@ -158,7 +164,9 @@ void main() {
 
     /* load rules from config */
     regex_init();
+    rules = malloc(sizeof(cron_rule_t *));
     rulesc = parse_config(rules, "/git/read-the-room/testconfig");
+    syslog(LOG_INFO, "rulesc=%d, pointers: rules=%d, rules[0]=%d", rulesc, &rules, &rules[0]);
 
     /* listen to socket */
     server_socket("/tmp/rtrd", *server_connection);
@@ -171,4 +179,5 @@ void main() {
         free(rules[i]);
     }
     free(rules);
+    exit(EXIT_SUCCESS);
 }

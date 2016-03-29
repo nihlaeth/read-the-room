@@ -57,4 +57,5 @@ void main() {
     printf("Starting client\n");
     client_socket("/tmp/rtrd", *client_conn);
     printf("Stopped client\n");
+    exit(EXIT_SUCCESS);
 }

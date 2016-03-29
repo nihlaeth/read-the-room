@@ -10,6 +10,6 @@
 #include <syslog.h>
 #include "./cronparser.h"
 
-char* pick_file(int rulesc, cron_rule_t **rules);
+void pick_file(int rulesc, cron_rule_t **rules, char* file_name);
 
 #endif // PICKFILE_H_
