@@ -3,6 +3,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <sys/socket.h>
 #include "./pickfile.h"
 #include "./cronparser.h"
@@ -71,6 +72,7 @@ int handle_message(int socketfd, char *msg) {
         send_ack(socketfd);
     } else if (strcasecmp(msg, "REQFILE") == 0) {
         pick_file(rulesc, rules, current_song);
+        syslog(LOG_INFO, "Current song: |%s|", current_song);
         size_t len = strlen(current_song) + strlen("FILE \n");
         char* tmp_msg = malloc(len + 1);
         snprintf(tmp_msg, len, "FILE %s\n", current_song);
