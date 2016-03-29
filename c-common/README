@@ -1,0 +1,14 @@
+c-common
+--------
+
+library of functions common to [c][c] projects
+
+tested-with: [gcc][gcc] 4.6.2
+
+[c]: http://www.open-std.org/jtc1/sc22/wg14/
+[gcc]: http://gcc.gnu.org/
+
+© [rohan drape][rd], 2003-2013, [gpl]
+
+[rd]: http://rd.slavepianos.org/
+[gpl]: http://gnu.org/copyleft/
