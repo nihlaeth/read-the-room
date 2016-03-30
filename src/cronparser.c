@@ -10,17 +10,8 @@
 #include <time.h>
 #include <regex.h>
 #include "cronparser.h"
-#define MAX_ERROR_MSG 0x1000
-/*
-typedef struct {
-    bool minutes[60];
-    bool hours[24];
-    bool days_of_month[31];
-    bool month[12];
-    bool days_of_week[7];
-    char *rule;
-} cront_rule_t;
-*/
+//#include "mem.h"
+#define MAX_ERROR_MSG 0x100
 
 int parse_config(cron_rule_t **rules, char * filename) {
     int rule_index = 0;
@@ -34,15 +25,16 @@ int parse_config(cron_rule_t **rules, char * filename) {
         syslog(LOG_ERR, "Could not open config file '%s'.", filename);
         exit(EXIT_FAILURE);
     }
-
+    cron_rule_t * tmp_rule;
     while ((read = getline(&line, &len, fp)) != -1) {
         int index = 0;
-        if (line[0] == '#') {
+        if (line[0] == '#' || strlen(line) < 10) {
+            /* comment or a line so short it can't be a valid rule */
             continue;
         }
         char *savePtr = line;
         char *token = strtok_r(savePtr, " ", &savePtr);
-        cron_rule_t * tmp_rule = malloc(sizeof(cron_rule_t));
+        tmp_rule = malloc(sizeof(cron_rule_t));
         init_rule(tmp_rule);
         while(token) {
             switch (index) {
@@ -61,22 +53,17 @@ int parse_config(cron_rule_t **rules, char * filename) {
                 case 4:
                     parse_days_of_week(token, tmp_rule);
                     break;
-                default:
-                    if (strlen(tmp_rule->rule) + strlen(token) + 2 > MAX_RULE_LENGTH) {
-                        syslog(
-                            LOG_ERR,
-                            "max rule length of %d exceeded",
-                            MAX_RULE_LENGTH);
-                        exit(EXIT_FAILURE);
-                    }
+                default:;
+                    /* make space for token */
+                    size_t rule_len = strlen(token) + strlen(tmp_rule->rule) + 2;
+                    tmp_rule->rule = realloc(tmp_rule->rule, rule_len);
                     // add a space
-                    strncat(tmp_rule->rule, " ", MAX_RULE_LENGTH - 1);
+                    strncat(tmp_rule->rule, " ", rule_len - 1);
                     // add token
-                    strncat(tmp_rule->rule, token, MAX_RULE_LENGTH - 1);
+                    strncat(tmp_rule->rule, token, rule_len - 1);
                     // check if last char is a newline, if so, remove it
-                    size_t len = strlen(tmp_rule->rule);
-                    if (tmp_rule->rule[len -1] == '\n') {
-                        tmp_rule->rule[len - 1] = '\0';
+                    if (tmp_rule->rule[rule_len -1] == '\n') {
+                        tmp_rule->rule[rule_len - 1] = '\0';
                     }
                     break;
             }
@@ -91,10 +78,13 @@ int parse_config(cron_rule_t **rules, char * filename) {
             /* make space for another pointer in rules */
             rules = realloc(rules, sizeof(cron_rule_t *) * (rule_index + 1));
             rules[rule_index] = tmp_rule;
+            printf("rules[%d]->minutes[0] = %d\n", rule_index, rules[rule_index]->minutes[0]);
+            printf("rules[%d]->minutes = %d\n", rule_index, rules[rule_index]->minutes);
             rule_index++;
         }
         else {
-            free(tmp_rule);
+            printf("freeing tmp_rule: %d\n", tmp_rule);
+            free_rule(tmp_rule);
         }
     }
 
@@ -105,6 +95,14 @@ int parse_config(cron_rule_t **rules, char * filename) {
 }
 
 void init_rule(cron_rule_t *rule) {
+    /* allocate memory */
+    rule->minutes = malloc(sizeof(bool) * 60);
+    rule->hours = malloc(sizeof(bool) * 24);
+    rule->days_of_month = malloc(sizeof(bool) * 31);
+    rule->months = malloc(sizeof(bool) * 12);
+    rule->days_of_week = malloc(sizeof(bool) * 7);
+    rule->rule = malloc(sizeof(char));
+    strcpy(rule->rule, "");
     int i;
     for (i = 0; i < 60; i++) {
         rule->minutes[i] = false;
@@ -121,7 +119,16 @@ void init_rule(cron_rule_t *rule) {
     for (i = 0; i < 7; i++) {
         rule->days_of_week[i] = false;
     }
-    strcpy(rule->rule, "");
+}
+
+void free_rule(cron_rule_t *rule) {
+    free(rule->minutes);
+    free(rule->hours);
+    free(rule->days_of_month);
+    free(rule->months);
+    free(rule->days_of_week);
+    free(rule->rule);
+    free(rule);
 }
 
 bool rule_match(cron_rule_t *rule, time_t time) {
@@ -211,7 +218,10 @@ void parse_subtoken(bool* return_values, int len, char *subtoken) {
             /* assume subtoken is a number */
             char *ptr;
             long int number = strtol(subtoken, &ptr, 10);
-            return_values[number] = true;
+            if (number < len) {
+                /* only try this if the array is actually that long */
+                return_values[number] = true;
+            }
         }
 
     } else if (match_regex(&r_subtoken_range, subtoken)) {

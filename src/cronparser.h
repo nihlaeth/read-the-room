@@ -10,15 +10,13 @@
 #include <string.h>
 #include <regex.h>
 
-#define MAX_RULE_LENGTH 200
-
 typedef struct cron_rule_t {
-    bool minutes[60];
-    bool hours[24];
-    bool days_of_month[31];
-    bool months[12];
-    bool days_of_week[7];
-    char rule[MAX_RULE_LENGTH];
+    bool *minutes;
+    bool *hours;
+    bool *days_of_month;
+    bool *months;
+    bool *days_of_week;
+    char *rule;
 } cron_rule_t;
 
 int parse_config(cron_rule_t **rules, char *filename);
@@ -26,6 +24,7 @@ int parse_config(cron_rule_t **rules, char *filename);
 bool rule_match(cron_rule_t *rule, time_t time);
 
 void init_rule(cron_rule_t *rule);
+void free_rule(cron_rule_t *rule);
 
 void compile_regex(regex_t *r, const char *regex_text);
 bool match_regex(regex_t *r, const char *to_match);
