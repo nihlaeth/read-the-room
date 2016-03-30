@@ -1,5 +1,5 @@
 bin_PROGRAMS = rtrd
-rtrd_SOURCES = rtrd.c cronparser.c sockets.c daemonize.c pickfile.c
+rtrd_SOURCES = rtrd.c cronparser.c sockets.c daemonize.c pickfile.c memory.c
 
 #check_PROGRAMS = testdaemon testpickfile testcronparser testclient testserver testrtrd
 #testdaemon_SOURCES = testdaemon.c daemonize.c

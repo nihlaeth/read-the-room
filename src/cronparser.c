@@ -10,7 +10,7 @@
 #include <time.h>
 #include <regex.h>
 #include "cronparser.h"
-//#include "mem.h"
+#include "memory.h"
 #define MAX_ERROR_MSG 0x100
 
 int parse_config(cron_rule_t **rules, char * filename) {
@@ -34,7 +34,7 @@ int parse_config(cron_rule_t **rules, char * filename) {
         }
         char *savePtr = line;
         char *token = strtok_r(savePtr, " ", &savePtr);
-        tmp_rule = malloc(sizeof(cron_rule_t));
+        tmp_rule = xmalloc(sizeof(cron_rule_t));
         init_rule(tmp_rule);
         while(token) {
             switch (index) {
@@ -56,7 +56,7 @@ int parse_config(cron_rule_t **rules, char * filename) {
                 default:;
                     /* make space for token */
                     size_t rule_len = strlen(token) + strlen(tmp_rule->rule) + 2;
-                    tmp_rule->rule = realloc(tmp_rule->rule, rule_len);
+                    tmp_rule->rule = xrealloc(tmp_rule->rule, rule_len);
                     // add a space
                     strncat(tmp_rule->rule, " ", rule_len - 1);
                     // add token
@@ -76,7 +76,7 @@ int parse_config(cron_rule_t **rules, char * filename) {
         }
         if (index > 0) {
             /* make space for another pointer in rules */
-            rules = realloc(rules, sizeof(cron_rule_t *) * (rule_index + 1));
+            rules = xrealloc(rules, sizeof(cron_rule_t *) * (rule_index + 1));
             rules[rule_index] = tmp_rule;
             printf("rules[%d]->minutes[0] = %d\n", rule_index, rules[rule_index]->minutes[0]);
             printf("rules[%d]->minutes = %d\n", rule_index, rules[rule_index]->minutes);
@@ -96,12 +96,12 @@ int parse_config(cron_rule_t **rules, char * filename) {
 
 void init_rule(cron_rule_t *rule) {
     /* allocate memory */
-    rule->minutes = malloc(sizeof(bool) * 60);
-    rule->hours = malloc(sizeof(bool) * 24);
-    rule->days_of_month = malloc(sizeof(bool) * 31);
-    rule->months = malloc(sizeof(bool) * 12);
-    rule->days_of_week = malloc(sizeof(bool) * 7);
-    rule->rule = malloc(sizeof(char));
+    rule->minutes = xmalloc(sizeof(bool) * 60);
+    rule->hours = xmalloc(sizeof(bool) * 24);
+    rule->days_of_month = xmalloc(sizeof(bool) * 31);
+    rule->months = xmalloc(sizeof(bool) * 12);
+    rule->days_of_week = xmalloc(sizeof(bool) * 7);
+    rule->rule = xmalloc(sizeof(char));
     strcpy(rule->rule, "");
     int i;
     for (i = 0; i < 60; i++) {
@@ -145,8 +145,11 @@ bool rule_match(cron_rule_t *rule, time_t time) {
 }
 
 void compile_regex(regex_t *r, const char *regex_text) {
+    printf("check 0\n");
     int status = regcomp(r, regex_text, REG_EXTENDED|REG_NEWLINE);
+    printf("check 1\n");
     if (status != 0) {
+    printf("check 2\n");
         char error_message[MAX_ERROR_MSG];
         regerror(status, r, error_message, MAX_ERROR_MSG);
         syslog(
@@ -156,6 +159,7 @@ void compile_regex(regex_t *r, const char *regex_text) {
             error_message);
         exit(EXIT_FAILURE);
     }
+    printf("check 3\n");
 }
 
 bool match_regex(regex_t *r, const char *to_match) {

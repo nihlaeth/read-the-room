@@ -2,13 +2,14 @@
  * Copyright 2016 Nihlaeth
  */
 
-#ifndef CRONPARSER_H_
-#define CRONPARSER_H_
+#ifndef SRC_CRONPARSER_H_
+#define SRC_CRONPARSER_H_
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
 #include <regex.h>
+#include "memory.h"
 
 typedef struct cron_rule_t {
     bool *minutes;
@@ -44,4 +45,4 @@ void parse_months(char *token, cron_rule_t *rule);
 void parse_days_of_week(char *token, cron_rule_t *rule);
 void parse_subtoken(bool* return_values, int len, char *subtoken);
 
-#endif // CRONPARSER_H_
+#endif // SRC_CRONPARSER_H_
