@@ -1,12 +1,11 @@
 #!/bin/zsh
 
-make rtrd
-make test-rtrd
+make
 echo "\n\nstart rtrd:\n"
-./bin/rtrd
+./src/rtrd
 sleep 1
 echo "\n\nstart testrtrd:\n"
-./bin/testrtrd
+./src/testrtrd
 sleep 1
 echo "\n\n/var/log/messages:\n"
 tail -n 10 /var/log/messages
