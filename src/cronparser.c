@@ -55,15 +55,15 @@ int parse_config(cron_rule_t **rules, char * filename) {
                     break;
                 default:;
                     /* make space for token */
-                    size_t rule_len = strlen(token) + strlen(tmp_rule->rule) + 2;
-                    tmp_rule->rule = xrealloc(tmp_rule->rule, rule_len);
+                    size_t rule_len = strlen(token) + strlen(*tmp_rule->rule) + 2;
+                    *tmp_rule->rule = xrealloc(*tmp_rule->rule, rule_len);
                     // add a space
-                    strncat(tmp_rule->rule, " ", rule_len - 1);
+                    strncat(*tmp_rule->rule, " ", rule_len - 1);
                     // add token
-                    strncat(tmp_rule->rule, token, rule_len - 1);
+                    strncat(*tmp_rule->rule, token, rule_len - 1);
                     // check if last char is a newline, if so, remove it
-                    if (tmp_rule->rule[rule_len -1] == '\n') {
-                        tmp_rule->rule[rule_len - 1] = '\0';
+                    if ((*tmp_rule->rule)[rule_len -1] == '\n') {
+                        (*tmp_rule->rule)[rule_len - 1] = '\0';
                     }
                     break;
             }
@@ -78,8 +78,8 @@ int parse_config(cron_rule_t **rules, char * filename) {
             /* make space for another pointer in rules */
             rules = xrealloc(rules, sizeof(cron_rule_t *) * (rule_index + 1));
             rules[rule_index] = tmp_rule;
-            printf("rules[%d]->minutes[0] = %d\n", rule_index, rules[rule_index]->minutes[0]);
-            printf("rules[%d]->minutes = %d\n", rule_index, rules[rule_index]->minutes);
+            printf("rules[%d]->minutes[0] = %d\n", rule_index, *rules[rule_index]->minutes[0]);
+            printf("rules[%d]->minutes = %d\n", rule_index, *rules[rule_index]->minutes);
             rule_index++;
         }
         else {
@@ -96,37 +96,49 @@ int parse_config(cron_rule_t **rules, char * filename) {
 
 void init_rule(cron_rule_t *rule) {
     /* allocate memory */
-    rule->minutes = xmalloc(sizeof(bool) * 60);
-    rule->hours = xmalloc(sizeof(bool) * 24);
-    rule->days_of_month = xmalloc(sizeof(bool) * 31);
-    rule->months = xmalloc(sizeof(bool) * 12);
-    rule->days_of_week = xmalloc(sizeof(bool) * 7);
-    rule->rule = xmalloc(sizeof(char));
-    strcpy(rule->rule, "");
+    rule->minutes = xmalloc(sizeof(bool *));
+    *rule->minutes = xmalloc(sizeof(bool) * 60);
+    rule->hours = xmalloc(sizeof(bool *));
+    *rule->hours = xmalloc(sizeof(bool) * 24);
+    rule->days_of_month = xmalloc(sizeof(bool *));
+    *rule->days_of_month = xmalloc(sizeof(bool) * 31);
+    rule->months = xmalloc(sizeof(bool *));
+    *rule->months = xmalloc(sizeof(bool) * 12);
+    rule->days_of_week = xmalloc(sizeof(bool *));
+    *rule->days_of_week = xmalloc(sizeof(bool) * 7);
+    rule->rule = xmalloc(sizeof(bool *));
+    *rule->rule = xmalloc(sizeof(char));
+    strcpy(*rule->rule, "");
     int i;
     for (i = 0; i < 60; i++) {
-        rule->minutes[i] = false;
+        (*rule->minutes)[i] = false;
     }
     for (i = 0; i < 24; i++) {
-        rule->hours[i] = false;
+        (*rule->hours)[i] = false;
     }
     for (i = 0; i < 31; i++) {
-        rule->days_of_month[i] = false;
+        (*rule->days_of_month)[i] = false;
     }
     for (i = 0; i < 12; i++) {
-        rule->months[i] = false;
+        (*rule->months)[i] = false;
     }
     for (i = 0; i < 7; i++) {
-        rule->days_of_week[i] = false;
+        (*rule->days_of_week)[i] = false;
     }
 }
 
 void free_rule(cron_rule_t *rule) {
+    free(*rule->minutes);
     free(rule->minutes);
+    free(*rule->hours);
     free(rule->hours);
+    free(*rule->days_of_month);
     free(rule->days_of_month);
+    free(*rule->months);
     free(rule->months);
+    free(*rule->days_of_week);
     free(rule->days_of_week);
+    free(*rule->rule);
     free(rule->rule);
     free(rule);
 }
@@ -134,22 +146,19 @@ void free_rule(cron_rule_t *rule) {
 bool rule_match(cron_rule_t *rule, time_t time) {
     struct tm * local_time = localtime(&time);
     if (
-            rule->minutes[local_time->tm_min] &&
-            rule->hours[local_time->tm_hour] &&
-            rule->days_of_month[local_time->tm_mday - 1] &&
-            rule->months[local_time->tm_mon] &&
-            rule->days_of_week[local_time->tm_wday]) {
+            (*rule->minutes)[local_time->tm_min] &&
+            (*rule->hours)[local_time->tm_hour] &&
+            (*rule->days_of_month)[local_time->tm_mday - 1] &&
+            (*rule->months)[local_time->tm_mon] &&
+            (*rule->days_of_week)[local_time->tm_wday]) {
         return true;
     }
     return false;
 }
 
 void compile_regex(regex_t *r, const char *regex_text) {
-    printf("check 0\n");
     int status = regcomp(r, regex_text, REG_EXTENDED|REG_NEWLINE);
-    printf("check 1\n");
     if (status != 0) {
-    printf("check 2\n");
         char error_message[MAX_ERROR_MSG];
         regerror(status, r, error_message, MAX_ERROR_MSG);
         syslog(
@@ -159,7 +168,6 @@ void compile_regex(regex_t *r, const char *regex_text) {
             error_message);
         exit(EXIT_FAILURE);
     }
-    printf("check 3\n");
 }
 
 bool match_regex(regex_t *r, const char *to_match) {
@@ -347,22 +355,22 @@ void split_into_subtokens(bool* arr, int len, char* token) {
 }
 
 void parse_minutes(char *token, cron_rule_t *rule) {
-    split_into_subtokens(rule->minutes, 60, token);
+    split_into_subtokens(*rule->minutes, 60, token);
 }
 
 void parse_hours(char *token, cron_rule_t *rule) {
-    split_into_subtokens(rule->hours, 24, token);
+    split_into_subtokens(*rule->hours, 24, token);
 }
 
 void parse_days_of_month(char *token, cron_rule_t *rule) {
-    split_into_subtokens(rule->days_of_month, 31, token);
+    split_into_subtokens(*rule->days_of_month, 31, token);
 }
 
 void parse_months(char *token, cron_rule_t *rule) {
-    split_into_subtokens(rule->months, 12, token);
+    split_into_subtokens(*rule->months, 12, token);
 }
 
 void parse_days_of_week(char *token, cron_rule_t *rule) {
-    split_into_subtokens(rule->days_of_week, 7, token);
+    split_into_subtokens(*rule->days_of_week, 7, token);
 }
 

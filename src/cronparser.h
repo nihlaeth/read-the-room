@@ -12,12 +12,12 @@
 #include "memory.h"
 
 typedef struct cron_rule_t {
-    bool *minutes;
-    bool *hours;
-    bool *days_of_month;
-    bool *months;
-    bool *days_of_week;
-    char *rule;
+    bool **minutes;
+    bool **hours;
+    bool **days_of_month;
+    bool **months;
+    bool **days_of_week;
+    char **rule;
 } cron_rule_t;
 
 int parse_config(cron_rule_t **rules, char *filename);
