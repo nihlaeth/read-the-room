@@ -188,7 +188,7 @@ void main() {
     /* check that rule 0 checks out */
     // int rulesc = parse_config(rules, "./testcronparser.config");
     printf("check 0\n");
-    printf("rules[0]->minutes[0] = %d\n", *rules[0]->minutes[0]);
+    printf("rules[0]->minutes[0] = %d\n", (*rules[0]->minutes)[0]);
     //printf("rules[0]->minutes = %d\n", rules[0]->minutes);
     bool expected_minutes[60];
     fill_bool_array(expected_minutes, 60, true);
