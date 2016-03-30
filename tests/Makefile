@@ -59,7 +59,7 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am_testcronparser_OBJECTS = testcronparser.$(OBJEXT) tap.$(OBJEXT) \
-	cronparser.$(OBJEXT) mem.$(OBJEXT)
+	cronparser.$(OBJEXT) memory.$(OBJEXT)
 testcronparser_OBJECTS = $(am_testcronparser_OBJECTS)
 testcronparser_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.
@@ -169,7 +169,7 @@ top_build_prefix = ../
 top_builddir = ..
 top_srcdir = ..
 #testcronparser_SOURCES = testcronparser.c $(sourcedir)/cronparser.c
-testcronparser_SOURCES = testcronparser.c tap.c $(abs_top_srcdir)/src/cronparser.c $(abs_top_srcdir)/src/mem.c
+testcronparser_SOURCES = testcronparser.c tap.c $(abs_top_srcdir)/src/cronparser.c $(abs_top_srcdir)/src/memory.c
 TESTS = $(check_PROGRAMS)
 all: all-am
 
@@ -219,7 +219,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 include ./$(DEPDIR)/cronparser.Po
-include ./$(DEPDIR)/mem.Po
+include ./$(DEPDIR)/memory.Po
 include ./$(DEPDIR)/tap.Po
 include ./$(DEPDIR)/testcronparser.Po
 
@@ -251,19 +251,19 @@ cronparser.obj: $(abs_top_srcdir)/src/cronparser.c
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o cronparser.obj `if test -f '$(abs_top_srcdir)/src/cronparser.c'; then $(CYGPATH_W) '$(abs_top_srcdir)/src/cronparser.c'; else $(CYGPATH_W) '$(srcdir)/$(abs_top_srcdir)/src/cronparser.c'; fi`
 
-mem.o: $(abs_top_srcdir)/src/mem.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT mem.o -MD -MP -MF $(DEPDIR)/mem.Tpo -c -o mem.o `test -f '$(abs_top_srcdir)/src/mem.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/src/mem.c
-	$(am__mv) $(DEPDIR)/mem.Tpo $(DEPDIR)/mem.Po
-#	source='$(abs_top_srcdir)/src/mem.c' object='mem.o' libtool=no \
+memory.o: $(abs_top_srcdir)/src/memory.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT memory.o -MD -MP -MF $(DEPDIR)/memory.Tpo -c -o memory.o `test -f '$(abs_top_srcdir)/src/memory.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/src/memory.c
+	$(am__mv) $(DEPDIR)/memory.Tpo $(DEPDIR)/memory.Po
+#	source='$(abs_top_srcdir)/src/memory.c' object='memory.o' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mem.o `test -f '$(abs_top_srcdir)/src/mem.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/src/mem.c
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o memory.o `test -f '$(abs_top_srcdir)/src/memory.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/src/memory.c
 
-mem.obj: $(abs_top_srcdir)/src/mem.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT mem.obj -MD -MP -MF $(DEPDIR)/mem.Tpo -c -o mem.obj `if test -f '$(abs_top_srcdir)/src/mem.c'; then $(CYGPATH_W) '$(abs_top_srcdir)/src/mem.c'; else $(CYGPATH_W) '$(srcdir)/$(abs_top_srcdir)/src/mem.c'; fi`
-	$(am__mv) $(DEPDIR)/mem.Tpo $(DEPDIR)/mem.Po
-#	source='$(abs_top_srcdir)/src/mem.c' object='mem.obj' libtool=no \
+memory.obj: $(abs_top_srcdir)/src/memory.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT memory.obj -MD -MP -MF $(DEPDIR)/memory.Tpo -c -o memory.obj `if test -f '$(abs_top_srcdir)/src/memory.c'; then $(CYGPATH_W) '$(abs_top_srcdir)/src/memory.c'; else $(CYGPATH_W) '$(srcdir)/$(abs_top_srcdir)/src/memory.c'; fi`
+	$(am__mv) $(DEPDIR)/memory.Tpo $(DEPDIR)/memory.Po
+#	source='$(abs_top_srcdir)/src/memory.c' object='memory.obj' libtool=no \
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
-#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o mem.obj `if test -f '$(abs_top_srcdir)/src/mem.c'; then $(CYGPATH_W) '$(abs_top_srcdir)/src/mem.c'; else $(CYGPATH_W) '$(srcdir)/$(abs_top_srcdir)/src/mem.c'; fi`
+#	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o memory.obj `if test -f '$(abs_top_srcdir)/src/memory.c'; then $(CYGPATH_W) '$(abs_top_srcdir)/src/memory.c'; else $(CYGPATH_W) '$(srcdir)/$(abs_top_srcdir)/src/memory.c'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \

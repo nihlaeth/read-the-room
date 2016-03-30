@@ -62,7 +62,8 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_rtrd_OBJECTS = rtrd.$(OBJEXT) cronparser.$(OBJEXT) \
-	sockets.$(OBJEXT) daemonize.$(OBJEXT) pickfile.$(OBJEXT)
+	sockets.$(OBJEXT) daemonize.$(OBJEXT) pickfile.$(OBJEXT) \
+	memory.$(OBJEXT)
 rtrd_OBJECTS = $(am_rtrd_OBJECTS)
 rtrd_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@
@@ -169,7 +170,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-rtrd_SOURCES = rtrd.c cronparser.c sockets.c daemonize.c pickfile.c
+rtrd_SOURCES = rtrd.c cronparser.c sockets.c daemonize.c pickfile.c memory.c
 all: all-am
 
 .SUFFIXES:
@@ -256,6 +257,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cronparser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/daemonize.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pickfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rtrd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sockets.Po@am__quote@

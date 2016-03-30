@@ -20,7 +20,7 @@ cronparser.o: cronparser.c /usr/include/stdc-predef.h \
  /usr/include/string.h /usr/include/xlocale.h /usr/include/bits/string.h \
  /usr/include/bits/string2.h /usr/include/syslog.h \
  /usr/include/sys/syslog.h /usr/include/bits/syslog-path.h \
- /usr/include/regex.h cronparser.h
+ /usr/include/regex.h cronparser.h memory.h
 
 /usr/include/stdc-predef.h:
 
@@ -109,3 +109,5 @@ cronparser.o: cronparser.c /usr/include/stdc-predef.h \
 /usr/include/regex.h:
 
 cronparser.h:
+
+memory.h:

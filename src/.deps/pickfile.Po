@@ -21,7 +21,7 @@ pickfile.o: pickfile.c /usr/include/stdc-predef.h /usr/include/stdio.h \
  /usr/include/sys/syslog.h /usr/include/bits/syslog-path.h \
  /usr/include/iconv.h cronparser.h \
  /usr/lib64/gcc/x86_64-slackware-linux/4.8.2/include/stdbool.h \
- /usr/include/regex.h
+ /usr/include/regex.h memory.h
 
 /usr/include/stdc-predef.h:
 
@@ -112,3 +112,5 @@ cronparser.h:
 /usr/lib64/gcc/x86_64-slackware-linux/4.8.2/include/stdbool.h:
 
 /usr/include/regex.h:
+
+memory.h:

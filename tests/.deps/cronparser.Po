@@ -20,7 +20,8 @@ cronparser.o: /git/read-the-room/src/cronparser.c \
  /usr/include/string.h /usr/include/xlocale.h /usr/include/bits/string.h \
  /usr/include/bits/string2.h /usr/include/syslog.h \
  /usr/include/sys/syslog.h /usr/include/bits/syslog-path.h \
- /usr/include/regex.h /git/read-the-room/src/cronparser.h
+ /usr/include/regex.h /git/read-the-room/src/cronparser.h \
+ /git/read-the-room/src/memory.h
 
 /usr/include/stdc-predef.h:
 
@@ -109,3 +110,5 @@ cronparser.o: /git/read-the-room/src/cronparser.c \
 /usr/include/regex.h:
 
 /git/read-the-room/src/cronparser.h:
+
+/git/read-the-room/src/memory.h:
