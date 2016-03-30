@@ -48,6 +48,21 @@ Downside is that I am not fluent in c. This is going to take a lot of research a
 * jack-play -> ringbuffer use, file playback
 * dcron -> parsing cron format rules
 
+##### mocp
+I have been looking at jack-play as an example, and it is rather perfect except that it only supports wav. The other player that came close was moc (or mocp). But it has an ncurses interface, and it tends to jam when using jack as a backend. But it supports a lot of differen audio formats and servers. And it is licensed under GPL, so we can re-use its code.
+
+##### About the jack issues
+mocp tends to jam when stopping a file when we are already paused, or playing instead of unpausing when paused. This only happens with jack as a backend. Chances are that we wont run into this issue since pausing/unpausing will be done by script, so we can make sure never to mix signals.
+
+##### About the code
+mocp is a huge project. Im trying to get a grasp of where I can hook in g get the most functionality and the fewest stuff we dont need.
+
+* player.c: play_file, player_pause, player_unpause (mind the jack jamming!)
+* decoder.c: is_sound_file, get_decoder
+* audio.c: req_play, audio_initialize, audio_exit, audio_play (may be too high level, does stuff with playlists)
+* softmixer.c: volume control
+* interface.c: interface_cmdline_playit
+
 #### Architecture
 * cli.c - parse command line options and pass them to readtheroom
 * readtheroom.c - determine what file to load next, pass to writetheroom
