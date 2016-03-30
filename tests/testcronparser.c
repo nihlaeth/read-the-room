@@ -58,14 +58,14 @@ void main() {
     init_rule(&test_rule);
     bool test_arr[60];
     fill_bool_array(test_arr, 60, false);
-    if (cmp_bool_array(*test_rule.minutes, test_arr, 60, "does init_rule zero initialize the minutes array?")) {
+    if (cmp_bool_array(test_rule.minutes, test_arr, 60, "does init_rule zero initialize the minutes array?")) {
         pass("does init_rule zero initialize the minutes array?");
     }
 
-    (*test_rule.minutes)[0] = true;
-    (*test_rule.days_of_month)[26] = true;
-    (*test_rule.months)[2] = true;
-    (*test_rule.days_of_week)[0] = true;
+    test_rule.minutes[0] = true;
+    test_rule.days_of_month[26] = true;
+    test_rule.months[2] = true;
+    test_rule.days_of_week[0] = true;
 
     struct tm test_time;
     /* Saturday 27 March 2016 05:00:00 */
@@ -80,7 +80,7 @@ void main() {
     time_t test_time_raw = mktime(&test_time);
 
     ok(!rule_match(&test_rule, test_time_raw), "do incompatible times fail to match?");
-    (*test_rule.hours)[5] = true;
+    test_rule.hours[5] = true;
     ok(rule_match(&test_rule, test_time_raw), "do compatible times match?");
 
 
@@ -177,30 +177,31 @@ void main() {
     if (cmp_bool_array(hours_array, expected_hours, 24, "split into subtokens")) {
         pass("split into subtokens");
     }
-
+    
     /* parse actual config file */
-    int rulesc;
-    cron_rule_t **rules = malloc(sizeof(cron_rule_t *));
-    /*lives_ok({ */
-        rulesc = parse_config(rules, "./testcronparser.config");
-    /*}, "parse test config file");*/
+    rule_container_t rules;
+    rules.arr = malloc(sizeof(cron_rule_t));
+    rules.num_rules = 0;
+    lives_ok({
+        parse_config(&rules, "./testcronparser.config");
+    }, "parse test config file");
 
     /* check that rule 0 checks out */
-    // int rulesc = parse_config(rules, "./testcronparser.config");
-    printf("check 0\n");
-    printf("rules[0]->minutes[0] = %d\n", (*rules[0]->minutes)[0]);
-    //printf("rules[0]->minutes = %d\n", rules[0]->minutes);
     bool expected_minutes[60];
     fill_bool_array(expected_minutes, 60, true);
-    /*
     if (cmp_bool_array(
-            rules[0]->minutes,
+            rules.arr[0].minutes,
             expected_minutes,
             60,
             "introspect first rule -> minutes")) {
         pass("introspect first rule -> minutes");
     }
-    */
+    
+    int i;
+    for (i = 0; i < rules.num_rules; i++) {
+        free(rules.arr[i].rule);
+    }
+    free(rules.arr);
 
     exit(exit_status());
 }

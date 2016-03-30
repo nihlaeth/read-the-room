@@ -9,23 +9,28 @@
 #include <stdbool.h>
 #include <string.h>
 #include <regex.h>
-#include "memory.h"
+#include "./memory.h"
 
 typedef struct cron_rule_t {
-    bool **minutes;
-    bool **hours;
-    bool **days_of_month;
-    bool **months;
-    bool **days_of_week;
-    char **rule;
+    bool minutes[60];
+    bool hours[24];
+    bool days_of_month[31];
+    bool months[12];
+    bool days_of_week[7];
+    char *rule;
 } cron_rule_t;
 
-int parse_config(cron_rule_t **rules, char *filename);
+typedef struct rule_container_t {
+    cron_rule_t *arr;
+    int num_rules;
+} rule_container_t;
+
+void parse_config(rule_container_t *rules, char *filename);
 
 bool rule_match(cron_rule_t *rule, time_t time);
 
 void init_rule(cron_rule_t *rule);
-void free_rule(cron_rule_t *rule);
+void copy_rule(cron_rule_t *dest, cron_rule_t *origin);
 
 void compile_regex(regex_t *r, const char *regex_text);
 bool match_regex(regex_t *r, const char *to_match);
