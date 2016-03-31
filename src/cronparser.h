@@ -8,7 +8,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <syslog.h>
 #include <regex.h>
+#include <time.h>
+#include "./cronparser.h"
 #include "./memory.h"
 
 typedef struct cron_rule_t {

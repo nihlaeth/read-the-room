@@ -6,8 +6,9 @@
 #include <time.h>
 #include <string.h>
 #include <syslog.h>
-#include <iconv.h>
 #include "./cronparser.h"
+#include "./memory.h"
+#include "./pickfile.h"
 
 
 void pick_file(rule_container_t *rules, char **file_name) {
@@ -18,13 +19,13 @@ void pick_file(rule_container_t *rules, char **file_name) {
     time(&current);
 
     rule_container_t matching_rules;
-    matching_rules.arr = malloc(sizeof(cron_rule_t));
+    matching_rules.arr = xmalloc(sizeof(cron_rule_t));
     matching_rules.num_rules = 0;
     
     int i;
     for (i = 0; i < rules->num_rules; i++) {
         if (rule_match(&rules->arr[i], current)) {
-            matching_rules.arr = realloc(
+            matching_rules.arr = xrealloc(
                 matching_rules.arr,
                 sizeof(cron_rule_t) * (matching_rules.num_rules + 1));
             copy_rule(&matching_rules.arr[matching_rules.num_rules], &rules->arr[i]);
@@ -39,7 +40,7 @@ void pick_file(rule_container_t *rules, char **file_name) {
     }
 
     /* concat all matching rules */
-    char *all_rules = malloc(len + 1);
+    char *all_rules = xmalloc(len + 1);
     strcpy(all_rules, "");
 
     for (i = 0; i < matching_rules.num_rules; i++) {
@@ -49,11 +50,11 @@ void pick_file(rule_container_t *rules, char **file_name) {
     /* 
      * arrays for tags -> we use them to construct the tmsu command
      */
-    char **mandatory_tags = malloc(sizeof(char *));
+    char **mandatory_tags = xmalloc(sizeof(char *));
     int mandatoryc = 0;
-    char **optional_tags = malloc(sizeof(char *));
+    char **optional_tags = xmalloc(sizeof(char *));
     int optionalc = 0;
-    char **exclusion_tags = malloc(sizeof(char *));
+    char **exclusion_tags = xmalloc(sizeof(char *));
     int exclusionc = 0;
 
     /* loop through tags */
@@ -67,22 +68,22 @@ void pick_file(rule_container_t *rules, char **file_name) {
         switch (tag[0]) {
             case '+':
                 /* mandatory tag */
-                mandatory_tags = realloc(mandatory_tags, sizeof(char *) * (mandatoryc + 1));
-                mandatory_tags[mandatoryc] = malloc(strlen(tag));
+                mandatory_tags = xrealloc(mandatory_tags, sizeof(char *) * (mandatoryc + 1));
+                mandatory_tags[mandatoryc] = xmalloc(strlen(tag));
                 strcpy(mandatory_tags[mandatoryc], &tag[1]);
                 mandatoryc++;
                 break;
             case '-':
                 /* exclusion tag */
-                exclusion_tags = realloc(exclusion_tags, sizeof(char *) * (exclusionc + 1));
-                exclusion_tags[exclusionc] = malloc(strlen(tag));
+                exclusion_tags = xrealloc(exclusion_tags, sizeof(char *) * (exclusionc + 1));
+                exclusion_tags[exclusionc] = xmalloc(strlen(tag));
                 strcpy(exclusion_tags[exclusionc], &tag[1]);
                 exclusionc++;
                 break;
             case '?':
                 /* optional tag */
-                optional_tags = realloc(optional_tags, sizeof(char *) * (optionalc + 1));
-                optional_tags[optionalc] = malloc(strlen(tag));
+                optional_tags = xrealloc(optional_tags, sizeof(char *) * (optionalc + 1));
+                optional_tags[optionalc] = xmalloc(strlen(tag));
                 strcpy(optional_tags[optionalc], &tag[1]);
                 optionalc++;
                 break;
@@ -100,7 +101,7 @@ void pick_file(rule_container_t *rules, char **file_name) {
 
     /* construct command */
     char *tmsu = "/usr/bin/tmsu files ";
-    char *cmd = malloc(strlen(tmsu) + 1);
+    char *cmd = xmalloc(strlen(tmsu) + 1);
     strcpy(cmd, tmsu);
     /* 0 == none, 1 == mandatory, 2 == optional, 3 == exclusion */
     int last_tag = 0;
@@ -112,7 +113,7 @@ void pick_file(rule_container_t *rules, char **file_name) {
             case 0:
                 /* first tag of this command, no prefix necessary */
                 new_cmd_len = strlen(cmd) + strlen(optional_tags[i]);
-                cmd = realloc(cmd, new_cmd_len + 1);
+                cmd = xrealloc(cmd, new_cmd_len + 1);
                 strncat(cmd, optional_tags[i], new_cmd_len);
                 break;
             case 1:
@@ -124,14 +125,14 @@ void pick_file(rule_container_t *rules, char **file_name) {
                  * what we might change in the futute. prepend " and "
                  */
                 new_cmd_len = strlen(cmd) + strlen(" and ") + strlen(optional_tags[i]);
-                cmd = realloc(cmd, new_cmd_len + 1);
+                cmd = xrealloc(cmd, new_cmd_len + 1);
                 strncat(cmd, " and ", new_cmd_len);
                 strncat(cmd, optional_tags[i], new_cmd_len);
                 break;
             case 2:
                 /* optional tag, prepend " or " */
                 new_cmd_len = strlen(cmd) + strlen(" or ") + strlen(optional_tags[i]);
-                cmd = realloc(cmd, new_cmd_len + 1);
+                cmd = xrealloc(cmd, new_cmd_len + 1);
                 strncat(cmd, " or ", new_cmd_len);
                 strncat(cmd, optional_tags[i], new_cmd_len);
                 break;
@@ -154,7 +155,7 @@ void pick_file(rule_container_t *rules, char **file_name) {
             case 0:
                 /* first tag of this command, no prefix necessary */
                 new_cmd_len = strlen(cmd) + strlen(mandatory_tags[i]);
-                cmd = realloc(cmd, new_cmd_len + 1);
+                cmd = xrealloc(cmd, new_cmd_len + 1);
                 strncat(cmd, mandatory_tags[i], new_cmd_len);
                 break;
             case 1:
@@ -164,7 +165,7 @@ void pick_file(rule_container_t *rules, char **file_name) {
             case 3:
                 /* exclusion tag, prefix " and " */
                 new_cmd_len = strlen(cmd) + strlen(" and ") + strlen(mandatory_tags[i]);
-                cmd = realloc(cmd, new_cmd_len + 1);
+                cmd = xrealloc(cmd, new_cmd_len + 1);
                 strncat(cmd, " and ", new_cmd_len);
                 strncat(cmd, mandatory_tags[i], new_cmd_len);
                 break;
@@ -187,7 +188,7 @@ void pick_file(rule_container_t *rules, char **file_name) {
             case 0:
                 /* first tag of this command, prefix "not " */
                 new_cmd_len = strlen(cmd) + strlen("not ") + strlen(exclusion_tags[i]);
-                cmd = realloc(cmd, new_cmd_len + 1);
+                cmd = xrealloc(cmd, new_cmd_len + 1);
                 strncat(cmd, "not ", new_cmd_len);
                 strncat(cmd, exclusion_tags[i], new_cmd_len);
                 break;
@@ -198,7 +199,7 @@ void pick_file(rule_container_t *rules, char **file_name) {
             case 3:
                 /* exclusions tag, prefix " and not " */
                 new_cmd_len = strlen(cmd) + strlen(" and not ") + strlen(exclusion_tags[i]);
-                cmd = realloc(cmd, new_cmd_len + 1);
+                cmd = xrealloc(cmd, new_cmd_len + 1);
                 strncat(cmd, " and not ", new_cmd_len);
                 strncat(cmd, exclusion_tags[i], new_cmd_len);
                 break;
@@ -217,13 +218,13 @@ void pick_file(rule_container_t *rules, char **file_name) {
     
     /* add the shuf command */
     char *shuf = " 2>&1 | /usr/bin/shuf -n 1 2>&1";
-    cmd = realloc(cmd, strlen(cmd) + strlen(shuf) + 1);
+    cmd = xrealloc(cmd, strlen(cmd) + strlen(shuf) + 1);
     strncat(cmd, shuf, strlen(cmd) + strlen(shuf));
 
     /* now let's fetch a file list, and have shuf pick a random line */
     FILE *in;
     char buff[512];
-    char *output = malloc(sizeof(char));
+    char *output = xmalloc(sizeof(char));
     output[0] = '\0';
 
     if (!(in = popen(cmd, "r"))) {
@@ -231,7 +232,7 @@ void pick_file(rule_container_t *rules, char **file_name) {
         exit(EXIT_FAILURE);
     }
     while(fgets(buff, sizeof(buff), in) != NULL) {
-        output = realloc(output, strlen(output) + strlen(buff) + 1);
+        output = xrealloc(output, strlen(output) + strlen(buff) + 1);
         strncat(output, buff, strlen(output) + strlen(buff));
     }
     pclose(in);

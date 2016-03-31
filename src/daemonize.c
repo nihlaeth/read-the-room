@@ -1,3 +1,6 @@
+/*
+ * Copyright 2016 Nihlaeth
+ */
 #include <stdio.h>    //stdin, stdout, stderr
 #include <stdlib.h>   //exit(3)
 #include <unistd.h>   //fork(3), chdir(3), sysconf(3)

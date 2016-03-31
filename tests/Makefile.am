@@ -11,6 +11,7 @@ testpickfile_SOURCES = testpickfile.c \
 		       $(abs_top_srcdir)/src/pickfile.c
 testrtrd_SOURCES = testrtrd.c \
 		   tap.c \
+		   $(abs_top_srcdir)/src/memory.c \
 		   $(abs_top_srcdir)/src/sockets.c
 
 TESTS = $(check_PROGRAMS)

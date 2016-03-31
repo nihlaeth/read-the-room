@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <sys/socket.h>
+#include "./memory.h"
 #include "./pickfile.h"
 #include "./cronparser.h"
 #include "./sockets.h"
@@ -41,30 +42,30 @@ void handle_message(int socketfd, char *msg) {
      * YES?
      */
     if (strcasecmp(msg, "PAUSE") == 0) {
-        queued_message = realloc(queued_message, strlen("PAUSE") + 1);
+        queued_message = xrealloc(queued_message, strlen("PAUSE") + 1);
         strcpy(queued_message, "PAUSE");
         // send SIGUSR1
         send_ack(socketfd);
     } else if (strcasecmp(msg, "PLAY") == 0) {
-        queued_message = realloc(queued_message, strlen("PLAY") + 1);
+        queued_message = xrealloc(queued_message, strlen("PLAY") + 1);
         strcpy(queued_message, "PLAY");
         // send SIGUSR1
         send_ack(socketfd);
     } else if (strcasecmp(msg, "NEXT") == 0) {
-        queued_message = realloc(queued_message, strlen("NEXT") + 1);
+        queued_message = xrealloc(queued_message, strlen("NEXT") + 1);
         strcpy(queued_message, "NEXT");
         // send SIGUSR1
         send_ack(socketfd);
     } else if (strcasecmp(msg, "CURRENT") == 0) {
         size_t len = strlen(*current_song) + strlen("CURRENT ") + 1;
-        char* tmp_msg = malloc(len);
+        char* tmp_msg = xmalloc(len);
         snprintf(tmp_msg, len, "CURRENT %s", *current_song);
         if (send(socketfd, tmp_msg, len , 0) == -1) {
             syslog(LOG_WARNING, "Failed to send current playing song.");
         }
         free(tmp_msg);
     } else if (strcasecmp(msg, "STOP") == 0) {
-        queued_message = realloc(queued_message, strlen("STOP") + 1);
+        queued_message = xrealloc(queued_message, strlen("STOP") + 1);
         strcpy(queued_message, "STOP");
         // send SIGUSR1
         // at ack, also shut down this daemon!
@@ -73,7 +74,7 @@ void handle_message(int socketfd, char *msg) {
         free(*current_song);
         pick_file(&rules, current_song);
         size_t len = strlen(*current_song) + strlen("FILE ") + 1;
-        char* tmp_msg = malloc(len);
+        char* tmp_msg = xmalloc(len);
         snprintf(tmp_msg, len, "FILE %s", *current_song);
         if (send(socketfd, tmp_msg, len, 0) == -1) {
             syslog(LOG_WARNING, "Failed to send new song.");
@@ -91,7 +92,7 @@ void handle_message(int socketfd, char *msg) {
         }
         else {
             strcpy(queued_message, "");
-            queued_message = realloc(queued_message, sizeof(char));
+            queued_message = xrealloc(queued_message, sizeof(char));
         }
     } else {
         /* unknown message */
@@ -103,7 +104,7 @@ void server_connection(int socketfd) {
     /* 0 means unknown, 1 = read-the-room, 2 = rtr-jack */
     char buf[128];
     int len;
-    char *msg = malloc(sizeof(char));
+    char *msg = xmalloc(sizeof(char));
     strcpy(msg, "");
     while (len = recv(socketfd, &buf, 128, 0), len > 0) {
         if (len == -1) {
@@ -122,21 +123,21 @@ void server_connection(int socketfd) {
         char *newline = strchr(buf, '\n');
         if (newline == NULL) {
             /* no newline in buffer, incomplete command */
-            msg = realloc(msg, strlen(msg) + strlen(buf) + 1);
+            msg = xrealloc(msg, strlen(msg) + strlen(buf) + 1);
             strncat(msg, buf, strlen(msg) + strlen(buf));
         } else {
             char *rest = &newline[1];
             newline[0] = '\0';
-            msg = realloc(msg, strlen(msg) + strlen(buf) + 1);
+            msg = xrealloc(msg, strlen(msg) + strlen(buf) + 1);
             strncat(msg, buf, strlen(msg) + strlen(buf));
             handle_message(socketfd, msg);
             
             /* figure out if the remaining message is worth the trouble */
             if (strlen(rest) > 1) {
-                msg = realloc(msg, strlen(rest) + 1);
+                msg = xrealloc(msg, strlen(rest) + 1);
                 strcpy(msg, rest);
             } else {
-                msg = realloc(msg, sizeof(char));
+                msg = xrealloc(msg, sizeof(char));
                 strcpy(msg, "");
             }
         }
@@ -148,15 +149,15 @@ void main() {
     daemonize("rtrd");
 
     /* init some data */
-    queued_message = malloc(sizeof(char *));
+    queued_message = xmalloc(sizeof(char *));
     strcpy(queued_message, "");
-    char* tmp = malloc(sizeof(char));
+    char* tmp = xmalloc(sizeof(char));
     strcpy(tmp, "");
     current_song = &tmp;
 
     /* load rules from config */
     regex_init();
-    rules.arr = malloc(sizeof(cron_rule_t));
+    rules.arr = xmalloc(sizeof(cron_rule_t));
     rules.num_rules = 0;
     parse_config(&rules, "/git/read-the-room/testconfig");
 

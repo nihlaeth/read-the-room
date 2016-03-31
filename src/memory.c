@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <syslog.h>
+#include "./memory.h"
 
 void *xmalloc(size_t size) {
     void *p = malloc(size);

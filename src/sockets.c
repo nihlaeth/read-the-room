@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <sys/un.h>
 #include <errno.h>
+#include "./sockets.h"
 
 void report_error() {
     switch (errno) {
