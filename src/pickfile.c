@@ -10,36 +10,40 @@
 #include "./cronparser.h"
 
 
-void pick_file(int rulesc, cron_rule_t **rules, char **file_name) {
+void pick_file(rule_container_t *rules, char **file_name) {
     /*
      * read rules, select file, store file name in filename
      */
     time_t current;
     time(&current);
-    /* we will have at most rulesc matches */
-    cron_rule_t **matching_rules = malloc(sizeof(cron_rule_t *) * rulesc);
-    int match_index = 0;
 
+    rule_container_t matching_rules;
+    matching_rules.arr = malloc(sizeof(cron_rule_t));
+    matching_rules.num_rules = 0;
+    
     int i;
-    for (i = 0; i < rulesc; i++) {
-        if (rule_match(rules[i], current)) {
-            matching_rules[match_index] = rules[i];
-            match_index++;
+    for (i = 0; i < rules->num_rules; i++) {
+        if (rule_match(&rules->arr[i], current)) {
+            matching_rules.arr = realloc(
+                matching_rules.arr,
+                sizeof(cron_rule_t) * (matching_rules.num_rules + 1));
+            copy_rule(&matching_rules.arr[matching_rules.num_rules], &rules->arr[i]);
+            matching_rules.num_rules++;
         }
     }
 
     /* get total length of rules */
     size_t len = 0;
-    for (i = 0; i < match_index; i++) {
-        len += strlen(matching_rules[i]->rule);
+    for (i = 0; i < matching_rules.num_rules; i++) {
+        len += strlen(matching_rules.arr[i].rule);
     }
 
     /* concat all matching rules */
     char *all_rules = malloc(len + 1);
     strcpy(all_rules, "");
 
-    for (i = 0; i < match_index; i++) {
-        strncat(all_rules, matching_rules[i]->rule, len);
+    for (i = 0; i < matching_rules.num_rules; i++) {
+        strncat(all_rules, matching_rules.arr[i].rule, len);
     }
 
     /* 
@@ -259,7 +263,10 @@ void pick_file(int rulesc, cron_rule_t **rules, char **file_name) {
 
     /* free up all the dynamically allocated memory */
     free(cmd);
-    free(matching_rules);
+    for (i = 0; i < matching_rules.num_rules; i++) {
+        free(matching_rules.arr[i].rule);
+    }
+    free(matching_rules.arr);
     free(all_rules);
     for (i = 0; i < mandatoryc; i++) {
         free(mandatory_tags[i]);
