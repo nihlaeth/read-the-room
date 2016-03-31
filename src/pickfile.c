@@ -234,6 +234,7 @@ void pick_file(rule_container_t *rules, char **file_name) {
         output = realloc(output, strlen(output) + strlen(buff) + 1);
         strncat(output, buff, strlen(output) + strlen(buff));
     }
+    pclose(in);
     /*
      * for some reason, the exit code is nonzero when run from
      * a daemon, even though the command execution was successful
