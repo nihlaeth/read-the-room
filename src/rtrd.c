@@ -10,8 +10,7 @@
 #include "./sockets.h"
 #include "./daemonize.h"
 
-cron_rule_t **rules;
-int rulesc;
+rule_container_t rules;
 char **current_song;
 /* we could use a queue here, but that's a lot of hasle
  * for something we will probably never actually use
@@ -21,7 +20,7 @@ char **current_song;
 char *queued_message;
 
 void send_ack(int socketfd) {
-    if (send(socketfd, "ACK\n", strlen("ACK\n") + 1, 0) == -1) {
+    if (send(socketfd, "ACK", strlen("ACK") + 1, 0) == -1) {
         syslog(LOG_WARNING, "Failed to send ACK");
     }
 }
@@ -42,41 +41,41 @@ void handle_message(int socketfd, char *msg) {
      * YES?
      */
     if (strcasecmp(msg, "PAUSE") == 0) {
-        queued_message = realloc(queued_message, strlen("PAUSE\n") + 1);
-        strcpy(queued_message, "PAUSE\n");
+        queued_message = realloc(queued_message, strlen("PAUSE") + 1);
+        strcpy(queued_message, "PAUSE");
         // send SIGUSR1
         send_ack(socketfd);
     } else if (strcasecmp(msg, "PLAY") == 0) {
-        queued_message = realloc(queued_message, strlen("PLAY\n") + 1);
-        strcpy(queued_message, "PLAY\n");
+        queued_message = realloc(queued_message, strlen("PLAY") + 1);
+        strcpy(queued_message, "PLAY");
         // send SIGUSR1
         send_ack(socketfd);
     } else if (strcasecmp(msg, "NEXT") == 0) {
-        queued_message = realloc(queued_message, strlen("NEXT\n") + 1);
-        strcpy(queued_message, "NEXT\n");
+        queued_message = realloc(queued_message, strlen("NEXT") + 1);
+        strcpy(queued_message, "NEXT");
         // send SIGUSR1
         send_ack(socketfd);
     } else if (strcasecmp(msg, "CURRENT") == 0) {
-        size_t len = strlen(*current_song) + strlen("CURRENT \n");
-        char* tmp_msg = malloc(len + 1);
-        snprintf(tmp_msg, len, "CURRENT %s\n", *current_song);
-        if (send(socketfd, tmp_msg, len + 1, 0) == -1) {
+        size_t len = strlen(*current_song) + strlen("CURRENT ") + 1;
+        char* tmp_msg = malloc(len);
+        snprintf(tmp_msg, len, "CURRENT %s", *current_song);
+        if (send(socketfd, tmp_msg, len , 0) == -1) {
             syslog(LOG_WARNING, "Failed to send current playing song.");
         }
         free(tmp_msg);
     } else if (strcasecmp(msg, "STOP") == 0) {
-        queued_message = realloc(queued_message, strlen("STOP\n") + 1);
-        strcpy(queued_message, "STOP\n");
+        queued_message = realloc(queued_message, strlen("STOP") + 1);
+        strcpy(queued_message, "STOP");
         // send SIGUSR1
         // at ack, also shut down this daemon!
         send_ack(socketfd);
     } else if (strcasecmp(msg, "REQFILE") == 0) {
         free(*current_song);
-        pick_file(rulesc, rules, current_song);
-        size_t len = strlen(*current_song) + strlen("FILE \n");
-        char* tmp_msg = malloc(len + 1);
-        snprintf(tmp_msg, len, "FILE %s\n", *current_song);
-        if (send(socketfd, tmp_msg, len + 1, 0) == -1) {
+        pick_file(&rules, current_song);
+        size_t len = strlen(*current_song) + strlen("FILE ") + 1;
+        char* tmp_msg = malloc(len);
+        snprintf(tmp_msg, len, "FILE %s", *current_song);
+        if (send(socketfd, tmp_msg, len, 0) == -1) {
             syslog(LOG_WARNING, "Failed to send new song.");
         }
         free(tmp_msg);
@@ -85,7 +84,7 @@ void handle_message(int socketfd, char *msg) {
         if (send(socketfd, queued_message, strlen(queued_message) + 1, 0) == -1) {
             syslog(LOG_WARNING, "Failed to send queued message |%s|", queued_message);
         }
-        if (strcasecmp(queued_message, "STOP\n") == 0) {
+        if (strcasecmp(queued_message, "STOP") == 0) {
             // shut down this daemon too!
             syslog(LOG_INFO, "Shutting down rtrd");
             exit(EXIT_SUCCESS);
@@ -157,8 +156,9 @@ void main() {
 
     /* load rules from config */
     regex_init();
-    rules = malloc(sizeof(cron_rule_t *));
-    rulesc = parse_config(rules, "/git/read-the-room/testconfig");
+    rules.arr = malloc(sizeof(cron_rule_t));
+    rules.num_rules = 0;
+    parse_config(&rules, "/git/read-the-room/testconfig");
 
     /* listen to socket */
     server_socket("/tmp/rtrd", *server_connection);
@@ -167,9 +167,9 @@ void main() {
     free(queued_message);
     free(*current_song);
     int i;
-    for (i = 0; i < rulesc; i++) {
-        free(rules[i]);
+    for (i = 0; i < rules.num_rules; i++) {
+        free(rules.arr[i].rule);
     }
-    free(rules);
+    free(rules.arr);
     exit(EXIT_SUCCESS);
 }
