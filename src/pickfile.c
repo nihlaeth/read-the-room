@@ -48,18 +48,12 @@ void pick_file(rule_container_t *rules, char **file_name) {
 
     /* 
      * arrays for tags -> we use them to construct the tmsu command
-     * 
-     * in the most extreme, a tag has length 3 (a space, an indication
-     * of how it's to be interpreted, and a single char for the tag
-     * itself. So we need to allocate space for at most
-     * strlen(all_rules) / 3
      */
-    size_t size_of_pointers = strlen(all_rules) / 3 + 1;
-    char **mandatory_tags = malloc(size_of_pointers);
+    char **mandatory_tags = malloc(sizeof(char *));
     int mandatoryc = 0;
-    char **optional_tags = malloc(size_of_pointers);
+    char **optional_tags = malloc(sizeof(char *));
     int optionalc = 0;
-    char **exclusion_tags = malloc(size_of_pointers);
+    char **exclusion_tags = malloc(sizeof(char *));
     int exclusionc = 0;
 
     /* loop through tags */
@@ -73,18 +67,21 @@ void pick_file(rule_container_t *rules, char **file_name) {
         switch (tag[0]) {
             case '+':
                 /* mandatory tag */
+                mandatory_tags = realloc(mandatory_tags, sizeof(char *) * (mandatoryc + 1));
                 mandatory_tags[mandatoryc] = malloc(strlen(tag));
                 strcpy(mandatory_tags[mandatoryc], &tag[1]);
                 mandatoryc++;
                 break;
             case '-':
                 /* exclusion tag */
+                exclusion_tags = realloc(exclusion_tags, sizeof(char *) * (exclusionc + 1));
                 exclusion_tags[exclusionc] = malloc(strlen(tag));
                 strcpy(exclusion_tags[exclusionc], &tag[1]);
                 exclusionc++;
                 break;
             case '?':
                 /* optional tag */
+                optional_tags = realloc(optional_tags, sizeof(char *) * (optionalc + 1));
                 optional_tags[optionalc] = malloc(strlen(tag));
                 strcpy(optional_tags[optionalc], &tag[1]);
                 optionalc++;
