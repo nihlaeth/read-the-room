@@ -25,9 +25,9 @@ testcronparser.o: testcronparser.c /usr/include/stdc-predef.h \
  /usr/include/bits/sigcontext.h /usr/include/bits/sigstack.h \
  /usr/include/sys/ucontext.h /usr/include/bits/sigthread.h \
  ../src/cronparser.h /usr/include/string.h /usr/include/bits/string.h \
- /usr/include/bits/string2.h /usr/include/regex.h ../src/./memory.h \
- /usr/include/syslog.h /usr/include/sys/syslog.h \
- /usr/include/bits/syslog-path.h
+ /usr/include/bits/string2.h /usr/include/syslog.h \
+ /usr/include/sys/syslog.h /usr/include/bits/syslog-path.h \
+ /usr/include/regex.h ../src/./cronparser.h ../src/./memory.h
 
 /usr/include/stdc-predef.h:
 
@@ -139,12 +139,14 @@ tap.h:
 
 /usr/include/bits/string2.h:
 
-/usr/include/regex.h:
-
-../src/./memory.h:
-
 /usr/include/syslog.h:
 
 /usr/include/sys/syslog.h:
 
 /usr/include/bits/syslog-path.h:
+
+/usr/include/regex.h:
+
+../src/./cronparser.h:
+
+../src/./memory.h:

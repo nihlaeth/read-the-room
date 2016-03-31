@@ -32,7 +32,8 @@ sockets.o: sockets.c /usr/include/stdc-predef.h /usr/include/stdlib.h \
  /usr/include/asm-generic/sockios.h /usr/include/sys/un.h \
  /usr/include/errno.h /usr/include/bits/errno.h \
  /usr/include/linux/errno.h /usr/include/asm/errno.h \
- /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h
+ /usr/include/asm-generic/errno.h /usr/include/asm-generic/errno-base.h \
+ sockets.h
 
 /usr/include/stdc-predef.h:
 
@@ -161,3 +162,5 @@ sockets.o: sockets.c /usr/include/stdc-predef.h /usr/include/stdlib.h \
 /usr/include/asm-generic/errno.h:
 
 /usr/include/asm-generic/errno-base.h:
+
+sockets.h:

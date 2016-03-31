@@ -14,7 +14,7 @@ memory.o: /git/read-the-room/src/memory.c /usr/include/stdc-predef.h \
  /usr/include/bits/stdlib-float.h /usr/include/syslog.h \
  /usr/include/sys/syslog.h \
  /usr/lib64/gcc/x86_64-slackware-linux/4.8.2/include/stdarg.h \
- /usr/include/bits/syslog-path.h
+ /usr/include/bits/syslog-path.h /git/read-the-room/src/./memory.h
 
 /usr/include/stdc-predef.h:
 
@@ -75,3 +75,5 @@ memory.o: /git/read-the-room/src/memory.c /usr/include/stdc-predef.h \
 /usr/lib64/gcc/x86_64-slackware-linux/4.8.2/include/stdarg.h:
 
 /usr/include/bits/syslog-path.h:
+
+/git/read-the-room/src/./memory.h:

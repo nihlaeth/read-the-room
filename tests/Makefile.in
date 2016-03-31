@@ -48,7 +48,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-check_PROGRAMS = testcronparser$(EXEEXT)
+check_PROGRAMS = testcronparser$(EXEEXT) testdaemonize$(EXEEXT) \
+	testpickfile$(EXEEXT) testrtrd$(EXEEXT)
 subdir = tests
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -62,6 +63,18 @@ am_testcronparser_OBJECTS = testcronparser.$(OBJEXT) tap.$(OBJEXT) \
 	cronparser.$(OBJEXT) memory.$(OBJEXT)
 testcronparser_OBJECTS = $(am_testcronparser_OBJECTS)
 testcronparser_LDADD = $(LDADD)
+am_testdaemonize_OBJECTS = testdaemonize.$(OBJEXT) tap.$(OBJEXT) \
+	daemonize.$(OBJEXT)
+testdaemonize_OBJECTS = $(am_testdaemonize_OBJECTS)
+testdaemonize_LDADD = $(LDADD)
+am_testpickfile_OBJECTS = testpickfile.$(OBJEXT) cronparser.$(OBJEXT) \
+	memory.$(OBJEXT) pickfile.$(OBJEXT)
+testpickfile_OBJECTS = $(am_testpickfile_OBJECTS)
+testpickfile_LDADD = $(LDADD)
+am_testrtrd_OBJECTS = testrtrd.$(OBJEXT) tap.$(OBJEXT) \
+	memory.$(OBJEXT) sockets.$(OBJEXT)
+testrtrd_OBJECTS = $(am_testrtrd_OBJECTS)
+testrtrd_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -70,8 +83,10 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(testcronparser_SOURCES)
-DIST_SOURCES = $(testcronparser_SOURCES)
+SOURCES = $(testcronparser_SOURCES) $(testdaemonize_SOURCES) \
+	$(testpickfile_SOURCES) $(testrtrd_SOURCES)
+DIST_SOURCES = $(testcronparser_SOURCES) $(testdaemonize_SOURCES) \
+	$(testpickfile_SOURCES) $(testrtrd_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -168,8 +183,24 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-#testcronparser_SOURCES = testcronparser.c $(sourcedir)/cronparser.c
-testcronparser_SOURCES = testcronparser.c tap.c $(abs_top_srcdir)/src/cronparser.c $(abs_top_srcdir)/src/memory.c
+testcronparser_SOURCES = testcronparser.c \
+			 tap.c \
+			 $(abs_top_srcdir)/src/cronparser.c \
+			 $(abs_top_srcdir)/src/memory.c
+
+testdaemonize_SOURCES = testdaemonize.c tap.c \
+			$(abs_top_srcdir)/src/daemonize.c
+
+testpickfile_SOURCES = testpickfile.c \
+		       $(abs_top_srcdir)/src/cronparser.c \
+		       $(abs_top_srcdir)/src/memory.c \
+		       $(abs_top_srcdir)/src/pickfile.c
+
+testrtrd_SOURCES = testrtrd.c \
+		   tap.c \
+		   $(abs_top_srcdir)/src/memory.c \
+		   $(abs_top_srcdir)/src/sockets.c
+
 TESTS = $(check_PROGRAMS)
 all: all-am
 
@@ -211,6 +242,15 @@ clean-checkPROGRAMS:
 testcronparser$(EXEEXT): $(testcronparser_OBJECTS) $(testcronparser_DEPENDENCIES) $(EXTRA_testcronparser_DEPENDENCIES) 
 	@rm -f testcronparser$(EXEEXT)
 	$(LINK) $(testcronparser_OBJECTS) $(testcronparser_LDADD) $(LIBS)
+testdaemonize$(EXEEXT): $(testdaemonize_OBJECTS) $(testdaemonize_DEPENDENCIES) $(EXTRA_testdaemonize_DEPENDENCIES) 
+	@rm -f testdaemonize$(EXEEXT)
+	$(LINK) $(testdaemonize_OBJECTS) $(testdaemonize_LDADD) $(LIBS)
+testpickfile$(EXEEXT): $(testpickfile_OBJECTS) $(testpickfile_DEPENDENCIES) $(EXTRA_testpickfile_DEPENDENCIES) 
+	@rm -f testpickfile$(EXEEXT)
+	$(LINK) $(testpickfile_OBJECTS) $(testpickfile_LDADD) $(LIBS)
+testrtrd$(EXEEXT): $(testrtrd_OBJECTS) $(testrtrd_DEPENDENCIES) $(EXTRA_testrtrd_DEPENDENCIES) 
+	@rm -f testrtrd$(EXEEXT)
+	$(LINK) $(testrtrd_OBJECTS) $(testrtrd_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -219,9 +259,15 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cronparser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/daemonize.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/memory.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pickfile.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sockets.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testcronparser.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testdaemonize.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testpickfile.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testrtrd.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -264,6 +310,48 @@ memory.obj: $(abs_top_srcdir)/src/memory.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/src/memory.c' object='memory.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o memory.obj `if test -f '$(abs_top_srcdir)/src/memory.c'; then $(CYGPATH_W) '$(abs_top_srcdir)/src/memory.c'; else $(CYGPATH_W) '$(srcdir)/$(abs_top_srcdir)/src/memory.c'; fi`
+
+daemonize.o: $(abs_top_srcdir)/src/daemonize.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT daemonize.o -MD -MP -MF $(DEPDIR)/daemonize.Tpo -c -o daemonize.o `test -f '$(abs_top_srcdir)/src/daemonize.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/src/daemonize.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/daemonize.Tpo $(DEPDIR)/daemonize.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/src/daemonize.c' object='daemonize.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o daemonize.o `test -f '$(abs_top_srcdir)/src/daemonize.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/src/daemonize.c
+
+daemonize.obj: $(abs_top_srcdir)/src/daemonize.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT daemonize.obj -MD -MP -MF $(DEPDIR)/daemonize.Tpo -c -o daemonize.obj `if test -f '$(abs_top_srcdir)/src/daemonize.c'; then $(CYGPATH_W) '$(abs_top_srcdir)/src/daemonize.c'; else $(CYGPATH_W) '$(srcdir)/$(abs_top_srcdir)/src/daemonize.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/daemonize.Tpo $(DEPDIR)/daemonize.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/src/daemonize.c' object='daemonize.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o daemonize.obj `if test -f '$(abs_top_srcdir)/src/daemonize.c'; then $(CYGPATH_W) '$(abs_top_srcdir)/src/daemonize.c'; else $(CYGPATH_W) '$(srcdir)/$(abs_top_srcdir)/src/daemonize.c'; fi`
+
+pickfile.o: $(abs_top_srcdir)/src/pickfile.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pickfile.o -MD -MP -MF $(DEPDIR)/pickfile.Tpo -c -o pickfile.o `test -f '$(abs_top_srcdir)/src/pickfile.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/src/pickfile.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/pickfile.Tpo $(DEPDIR)/pickfile.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/src/pickfile.c' object='pickfile.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pickfile.o `test -f '$(abs_top_srcdir)/src/pickfile.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/src/pickfile.c
+
+pickfile.obj: $(abs_top_srcdir)/src/pickfile.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT pickfile.obj -MD -MP -MF $(DEPDIR)/pickfile.Tpo -c -o pickfile.obj `if test -f '$(abs_top_srcdir)/src/pickfile.c'; then $(CYGPATH_W) '$(abs_top_srcdir)/src/pickfile.c'; else $(CYGPATH_W) '$(srcdir)/$(abs_top_srcdir)/src/pickfile.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/pickfile.Tpo $(DEPDIR)/pickfile.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/src/pickfile.c' object='pickfile.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o pickfile.obj `if test -f '$(abs_top_srcdir)/src/pickfile.c'; then $(CYGPATH_W) '$(abs_top_srcdir)/src/pickfile.c'; else $(CYGPATH_W) '$(srcdir)/$(abs_top_srcdir)/src/pickfile.c'; fi`
+
+sockets.o: $(abs_top_srcdir)/src/sockets.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sockets.o -MD -MP -MF $(DEPDIR)/sockets.Tpo -c -o sockets.o `test -f '$(abs_top_srcdir)/src/sockets.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/src/sockets.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/sockets.Tpo $(DEPDIR)/sockets.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/src/sockets.c' object='sockets.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sockets.o `test -f '$(abs_top_srcdir)/src/sockets.c' || echo '$(srcdir)/'`$(abs_top_srcdir)/src/sockets.c
+
+sockets.obj: $(abs_top_srcdir)/src/sockets.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sockets.obj -MD -MP -MF $(DEPDIR)/sockets.Tpo -c -o sockets.obj `if test -f '$(abs_top_srcdir)/src/sockets.c'; then $(CYGPATH_W) '$(abs_top_srcdir)/src/sockets.c'; else $(CYGPATH_W) '$(srcdir)/$(abs_top_srcdir)/src/sockets.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/sockets.Tpo $(DEPDIR)/sockets.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(abs_top_srcdir)/src/sockets.c' object='sockets.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sockets.obj `if test -f '$(abs_top_srcdir)/src/sockets.c'; then $(CYGPATH_W) '$(abs_top_srcdir)/src/sockets.c'; else $(CYGPATH_W) '$(srcdir)/$(abs_top_srcdir)/src/sockets.c'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \

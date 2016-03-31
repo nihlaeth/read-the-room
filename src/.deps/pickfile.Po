@@ -18,10 +18,9 @@ pickfile.o: pickfile.c /usr/include/stdc-predef.h /usr/include/stdio.h \
  /usr/include/bits/stdlib-float.h /usr/include/xlocale.h \
  /usr/include/string.h /usr/include/bits/string.h \
  /usr/include/bits/string2.h /usr/include/syslog.h \
- /usr/include/sys/syslog.h /usr/include/bits/syslog-path.h \
- /usr/include/iconv.h cronparser.h \
+ /usr/include/sys/syslog.h /usr/include/bits/syslog-path.h cronparser.h \
  /usr/lib64/gcc/x86_64-slackware-linux/4.8.2/include/stdbool.h \
- /usr/include/regex.h memory.h
+ /usr/include/regex.h cronparser.h memory.h memory.h pickfile.h
 
 /usr/include/stdc-predef.h:
 
@@ -105,12 +104,16 @@ pickfile.o: pickfile.c /usr/include/stdc-predef.h /usr/include/stdio.h \
 
 /usr/include/bits/syslog-path.h:
 
-/usr/include/iconv.h:
-
 cronparser.h:
 
 /usr/lib64/gcc/x86_64-slackware-linux/4.8.2/include/stdbool.h:
 
 /usr/include/regex.h:
 
+cronparser.h:
+
 memory.h:
+
+memory.h:
+
+pickfile.h:
