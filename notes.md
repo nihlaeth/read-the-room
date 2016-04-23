@@ -17,64 +17,11 @@ Write a music player that adapts its playlist depending on what time/day it is.
 * stop/start playback at set times (use cronjob for this!)
 
 
-## Approaches
+## Approach
+Write an mocp client, so that we don't have to concern ourself with the audio playing complexities.
 
-### Easy
-Do not write a jack client, just create a script that feeds files to an existing jack audio player.
-
-jack-play might have been suitable, but it only supports wav files. mocp is too unstable for this purpose. mpd might suit, but I dislike how hard it is to add files to the library. aqualung seems feature rich but it has a graphical user interface (it supports some command line instruction). Also; no slackbuild. 
-
-So, no client that fits all my needs here. And lets face it, I am way too intrigued by the idea of writing a jack client to take the easy road.
-
-### Medium
-Use either jack-client or py-jack to write this thing in python. It will take some figuring out as documentation is sparse and some threading magic is necessary, but I can get there.
-
-Downside is that there is no way to eliminate locking system calls from functions that have to be realtime safe. So there will be x-runs. Python is not a suitable language for this.
-
-### Hard
-Write the entire thing in c. This will mean it will function correctly and efficiently (well, insofar as I can write efficient c code). No more x runs than necessary. Also, we can use proper realtime permissions and stuff because no interpreter.
-
-Downside is that I am not fluent in c. This is going to take a lot of research and trial and error.
-
-#### C libraries
-* libsamplerate -> high quality samplerate conversion
-* libsndfile -> wav decoding
-* libflac -> flac decoding
-* libvorbis -> ogg decoding
-* libmad -> decode mp3
-* jack -> output
-
-#### Useful examples
-* jack-play -> ringbuffer use, file playback
-* dcron -> parsing cron format rules
-
-##### mocp
-I have been looking at jack-play as an example, and it is rather perfect except that it only supports wav. The other player that came close was moc (or mocp). But it has an ncurses interface, and it tends to jam when using jack as a backend. But it supports a lot of differen audio formats and servers. And it is licensed under GPL, so we can re-use its code.
-
-##### About the jack issues
-mocp tends to jam when stopping a file when we are already paused, or playing instead of unpausing when paused. This only happens with jack as a backend. Chances are that we wont run into this issue since pausing/unpausing will be done by script, so we can make sure never to mix signals.
-
-##### About the code
-mocp is a huge project. Im trying to get a grasp of where I can hook in g get the most functionality and the fewest stuff we dont need.
-
-* player.c: play_file, player_pause, player_unpause (mind the jack jamming!)
-* decoder.c: is_sound_file, get_decoder
-* audio.c: req_play, audio_initialize, audio_exit, audio_play (may be too high level, does stuff with playlists)
-* softmixer.c: volume control
-* interface.c: interface_cmdline_playit
-
-#### Architecture
-* cli.c - parse command line options and pass them to readtheroom
-* readtheroom.c - determine what file to load next, pass to writetheroom
-* writetheroom.c - consists of 3 threads
-* * non-realtime: socket read thread
-* * non-realtime: read file from disk, decode and resample, write to ringbuffer
-* * realtime: read from ringbuffer, write to jack port
-
-IPC via local sockets.
-
-#### Command line interface
-##### Functions
+### Command line interface
+#### Functions
 * play/pause
 * skip to next song
 * start and stop daemon(s)
@@ -82,7 +29,7 @@ IPC via local sockets.
 * define alternative config file
 * define jack regex for automatic port connection
 
-##### cli options
+#### cli options
 * read-the-room COMMAND(play|pause|next|start|stop|status)
 * play -> resume playback
 * pause -> pause playback
@@ -92,48 +39,38 @@ IPC via local sockets.
 * stop -> stop daemons
 * status -> display server status and what song is currently playing
 
-##### planned features
+#### planned features
 * volume control
 * reload config file
 * temporary rule definition
 
-#### Communication between daemons
+### Communication between daemons
 commands separated by newlines
 
-##### rtr can receive:
-###### read-the-room(client) to rtrd(server)
-* IDENT read-the-room
+#### rtrd can receive:
+##### read-the-room(client) to rtrd(server)
 * PAUSE
 * PLAY
 * NEXT
 * CURRENT
 * STOP
+TODO: add volume control
 
-###### rtr-jack(client) to rtrd(server)
-* IDENT rtr-jack
-* REQFILE
-* YES?
-
-##### rtrd can send:
-###### rtrd(server) to read-the-room(client)
+#### rtrd can send:
+##### rtrd(server) to read-the-room(client)
 * CURRENT filename
 * ACK
 
-###### rtrd(server) to rtr-jack(client)
-* FILE filename
+### Architecture
+#### rtrd
+Consists of two threads. An mocp client thread that handles events from mocp and instructs the server what files to play, and a socket server that listens for command line instructions (pause, next, that kind of stuff).
 
-Then there are a couple of messages that need to be initiated by rtrd.
-At such a time, we send SIGUSR1 to rtr-jack, at which it will sign on
-and send us a YES? - we will respond with the following:
-* NEXT filename
-* PAUSE
-* PLAY
-* STOP
+Both threads have acces to the current_song variable, which is protected with a mutex. Inter thread communication happens via a pipe (socket server writes, mocp client reads). Commands that require action from the mocp client, like for example skipping to the next song, are handled that way.
 
-#### Config format parsing
+### Config format parsing
 We use the cron format for configuration. Since no parser is available for cpp/c, we create one ourselves using the existing cron libraries.
 
-##### Format
+#### Format
 minute hour day_of_month month day_of_week tag_rules
 
 * lines starting with # are ignored (comments)
@@ -141,7 +78,7 @@ minute hour day_of_month month day_of_week tag_rules
 * tokens can consist of comma separated sub-tokens
 * sub-token can be *, numeric, a range, divisor, any combination of those, or in the case of day_of_week and month, a three-letter name (e.g. mon, feb)
 
-##### Pseudocode
+#### Pseudocode
 Excuse the half-python, half-c syntax, just wanted to get my thoughts written down without implementation complexity.
 ```
 struct cron_rule_t {
@@ -182,19 +119,15 @@ bool rule_match(rule, time) {
 }
 ```
 
-##### Improvement points
+#### Improvement points
 * allow multi-line rules with a backslash escaped newline
 * trim whitespace
 * convert double spaces to single spaces?
 * treat whitespace only lines as empty
 
-#### rtrd
-
-##### rules
+#### rules
 Rules are space separated lists of tmsu tags, prefixed with -|+|? to indicate their optionality and/or exclusion.
 
 * + -> mandatory: means this tag has to be present
 * ? -> optional: means a file will be chose with at least one of the optional tags
 * - -> exclusion: files with this tag will be excluded
-
-
